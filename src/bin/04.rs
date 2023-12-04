@@ -20,10 +20,10 @@ struct LotteryCard {
 
 impl Parsable for LotteryCard {
     fn parse(input: &str) -> IResult<&str, Self> {
-        let mut parse_numbers = separated_list1(multispace1, map_res(digit1, u32::from_str));
+        let mut parse_numbers = separated_list1(multispace1, u32::parse);
 
         let (input, _) = tuple((tag("Card"), multispace0))(input)?;
-        let (input, id) = map_res(digit1, u32::from_str)(input)?;
+        let (input, id) = u32::parse(input)?;
         let (input, _) = is_a(": ")(input)?;
 
         let (input, winning_numbers) = parse_numbers(input)?;

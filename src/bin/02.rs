@@ -41,9 +41,8 @@ impl Parsable for Color {
 }
 
 fn parse_color_map(input: &str) -> IResult<&str, HashMap<Color, u32>> {
-    let number = map_res(digit1, u32::from_str);
     let color_count = map(
-        separated_pair(number, char(' '), Color::parse),
+        separated_pair(u32::parse, char(' '), Color::parse),
         |(count, color)| (color, count),
     );
 
@@ -61,7 +60,7 @@ struct DiceGame {
 impl Parsable for DiceGame {
     fn parse(input: &str) -> IResult<&str, DiceGame> {
         let (input, _) = tag("Game ")(input)?;
-        let (input, id) = map_res(digit1, u32::from_str)(input)?;
+        let (input, id) = u32::parse(input)?;
         let (input, _) = tag(": ")(input)?;
 
         let (input, sets) = separated_list1(tag("; "), parse_color_map)(input)?;
