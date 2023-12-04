@@ -10,17 +10,11 @@ use nom::multi::separated_list1;
 use nom::sequence::separated_pair;
 use nom::IResult;
 
-use advent_of_code::utils::parse_input_by_lines;
+use advent_of_code::utils::{parse_input_by_lines, Parsable};
 
 use crate::Color::*;
 
 advent_of_code::solution!(2);
-
-trait Parsable {
-    fn parse(input: &str) -> IResult<&str, Self>
-    where
-        Self: Sized;
-}
 
 #[derive(Eq, PartialEq, Debug, Copy, Clone, Hash)]
 enum Color {
@@ -131,6 +125,7 @@ pub fn part_two(input: &str) -> Option<u32> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use advent_of_code::utils::Parsable;
 
     #[test]
     fn test_color_parse() {

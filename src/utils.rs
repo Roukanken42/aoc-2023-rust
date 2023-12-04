@@ -12,3 +12,9 @@ where
 {
     all_consuming(terminated(separated_list1(line_ending, f), line_ending))
 }
+
+pub trait Parsable {
+    fn parse(input: &str) -> IResult<&str, Self>
+    where
+        Self: Sized;
+}
