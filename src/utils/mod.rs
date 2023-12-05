@@ -6,6 +6,8 @@ use nom::sequence::terminated;
 use nom::{IResult, Parser};
 use std::str::FromStr;
 
+mod location;
+
 pub fn parse_input_by_lines<'a, O, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&str, Vec<O>, E>
 where
     F: Parser<&'a str, O, E>,

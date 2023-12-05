@@ -1,15 +1,5 @@
 advent_of_code::solution!(3);
 
-trait Utils2d<T> {
-    fn get_2d(&self, x: usize, y: usize) -> Option<&T>;
-}
-
-impl<T> Utils2d<T> for Vec<Vec<T>> {
-    fn get_2d(&self, x: usize, y: usize) -> Option<&T> {
-        self.get(y).and_then(|row| row.get(x))
-    }
-}
-
 pub fn part_one(input: &str) -> Option<u32> {
     let x: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
 
