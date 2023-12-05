@@ -34,8 +34,9 @@ impl Parsable for u32 {
     }
 }
 
-impl Parsable for u64 {
+impl Parsable for i64 {
     fn parse(input: &str) -> IResult<&str, Self> {
-        map_res(digit1, u64::from_str)(input)
+        // TODO: fix negative numbers
+        map_res(digit1, i64::from_str)(input)
     }
 }
