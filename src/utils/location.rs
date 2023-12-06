@@ -1,6 +1,6 @@
-use num::traits::NumOps;
-use num::{zero, Bounded, Num, One, Zero};
-use std::ops::{Add, Div, Mul, Rem, Sub};
+use std::ops::{Add, Div, Mul, Sub};
+
+use num::{zero, Bounded, Num, Zero};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Location<T: Num> {
