@@ -24,7 +24,7 @@ fn parse_part1(input: &str) -> IResult<&str, (Vec<u64>, Vec<u64>)> {
 
 fn solve(time: u64, distance: u64) -> u64 {
     let discriminant = ((time * time) as f64 - 4f64 * distance as f64).sqrt();
-    let min = ((time as f64 - discriminant) / 2.0).max(0.0);
+    let min = (time as f64 - discriminant) / 2.0;
     let max = (time as f64 + discriminant) / 2.0;
 
     (max.ceil() - min.floor() - 1.0) as u64
