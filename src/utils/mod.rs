@@ -1,10 +1,11 @@
+use std::str::FromStr;
+
 use nom::character::complete::{digit1, line_ending};
 use nom::combinator::{all_consuming, map_res, opt};
 use nom::error::ParseError;
 use nom::multi::separated_list1;
 use nom::sequence::terminated;
 use nom::{IResult, Parser};
-use std::str::FromStr;
 
 mod location;
 
@@ -30,11 +31,19 @@ pub trait Parsable {
         Self: Sized;
 }
 
-impl Parsable for u32 {
-    fn parse(input: &str) -> IResult<&str, Self> {
-        map_res(digit1, u32::from_str)(input)
-    }
+macro_rules! impl_parsable_uint {
+    (for $($t:ty),+) => {
+        $(
+            impl Parsable for $t {
+                fn parse(input: &str) -> IResult<&str, Self> {
+                    map_res(digit1, Self::from_str)(input)
+                }
+            }
+        )+
+    };
 }
+
+impl_parsable_uint!(for u8, u16, u32, u64, u128);
 
 impl Parsable for i64 {
     fn parse(input: &str) -> IResult<&str, Self> {
