@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Sub};
 
-use num::{zero, Bounded, Num, Zero};
+use num::{one, zero, Bounded, Num, Zero};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Location<T: Num> {
@@ -11,6 +11,18 @@ pub struct Location<T: Num> {
 impl<T: Num> Location<T> {
     fn new(x: T, y: T) -> Self {
         Self { x, y }
+    }
+}
+
+// TODO: wrong implementation
+impl<T: Num + Bounded + Copy> Location<T> {
+    fn neighborhood(&self) -> Vec<Self> {
+        vec![
+            *self + Location::new(zero(), one()),
+            *self - Location::new(zero(), one()),
+            *self + Location::new(one(), zero()),
+            *self - Location::new(one(), zero()),
+        ]
     }
 }
 
