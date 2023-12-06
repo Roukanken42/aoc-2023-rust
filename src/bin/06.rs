@@ -1,16 +1,15 @@
-use advent_of_code::utils::{parse_input, Parsable};
+use itertools::Itertools;
 use nom::bytes::complete::tag;
-use nom::character::complete::{digit1, line_ending, space0, space1};
-use nom::combinator::{map_res, recognize};
+use nom::character::complete::{line_ending, space0, space1};
 use nom::multi::separated_list1;
 use nom::sequence::delimited;
 use nom::IResult;
-use num::integer::Roots;
-use std::str::FromStr;
+
+use advent_of_code::utils::{parse_input, Parsable};
 
 advent_of_code::solution!(6);
 
-fn parse_part1(input: &str) -> IResult<&str, (Vec<u64>, Vec<u64>)> {
+fn parse(input: &str) -> IResult<&str, (Vec<u64>, Vec<u64>)> {
     let (input, _) = tag("Time:")(input)?;
     let (input, times) =
         delimited(space0, separated_list1(space1, u64::parse), line_ending)(input)?;
@@ -31,39 +30,24 @@ fn solve(time: u64, distance: u64) -> u64 {
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
-    let (_, (times, distances)) = parse_input(parse_part1)(input).unwrap();
+    let (_, (times, distances)) = parse_input(parse)(input).unwrap();
 
     Some(
         times
-            .iter()
-            .zip(distances.iter())
-            .map(|(&time, &distance)| solve(time, distance))
+            .into_iter()
+            .zip(distances.into_iter())
+            .map(|(time, distance)| solve(time, distance))
             .product(),
     )
 }
 
-fn parse_part2(input: &str) -> IResult<&str, (u64, u64)> {
-    let (input, _) = tag("Time:")(input)?;
-    let mut delimited1 = delimited(
-        space0,
-        map_res(
-            recognize(separated_list1(space1, digit1)),
-            |digits: &str| u64::from_str(&digits.replace(" ", "")),
-        ),
-        line_ending,
-    );
-
-    let (input, times) = delimited1(input)?;
-
-    let (input, _) = tag("Distance:")(input)?;
-    let (input, distances) = delimited1(input)?;
-
-    Ok((input, (times, distances)))
-}
-
 pub fn part_two(input: &str) -> Option<u64> {
-    let (_, (time, distance)) = parse_input(parse_part2)(input).unwrap();
-    Some(solve(time, distance) as u64)
+    let (_, (times, distances)) = parse_input(parse)(input).unwrap();
+
+    let time = times.iter().join("").parse::<u64>().unwrap();
+    let distance = distances.iter().join("").parse::<u64>().unwrap();
+
+    Some(solve(time, distance))
 }
 
 #[cfg(test)]
