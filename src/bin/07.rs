@@ -4,6 +4,7 @@ use itertools::Itertools;
 use nom::character::complete::{one_of, space1};
 use nom::combinator::map_res;
 use nom::multi::count;
+use nom::sequence::separated_pair;
 use nom::IResult;
 
 use advent_of_code::utils::{parse_input_by_lines, Parsable};
@@ -132,9 +133,8 @@ impl CamelCardsResult {
 
 impl Parsable for BetHand {
     fn parse(input: &str) -> IResult<&str, Self> {
-        let (input, cards) = count(CardValue::parse, 5)(input)?;
-        let (input, _) = space1(input)?;
-        let (input, value) = u32::parse(input)?;
+        let parse_cards = count(CardValue::parse, 5);
+        let (input, (cards, value)) = separated_pair(parse_cards, space1, u32::parse)(input)?;
 
         Ok((input, Self { cards, value }))
     }
