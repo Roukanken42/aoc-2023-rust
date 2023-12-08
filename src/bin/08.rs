@@ -1,8 +1,8 @@
 use std::collections::HashMap;
-use std::iter::Cycle;
+use std::hash::Hash;
+use std::iter::{zip, Cycle, Enumerate};
 use std::slice::Iter;
 
-use itertools::Itertools;
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take};
 use nom::character::complete::{char, line_ending};
@@ -10,6 +10,7 @@ use nom::combinator::value;
 use nom::multi::{count, many1, separated_list1};
 use nom::sequence::{delimited, separated_pair, terminated};
 use nom::IResult;
+use num::integer::lcm;
 
 use advent_of_code::utils::{parse_input, Parsable};
 
@@ -55,11 +56,11 @@ impl<'a> Parsable<'a> for Day8<'a> {
 }
 
 impl<'a> Day8<'a> {
-    fn walk_trough_desert<'b>(&'b self, start: &'b str) -> impl Iterator<Item = &str> {
+    fn walk_trough_desert(&'a self, start: &'a str) -> WalkThroughDesert<'a> {
         WalkThroughDesert {
             graph: &self.graph,
             current: start,
-            directions: self.directions.iter().cycle(),
+            directions: self.directions.iter().enumerate().cycle(),
         }
     }
 }
@@ -67,21 +68,37 @@ impl<'a> Day8<'a> {
 struct WalkThroughDesert<'a> {
     graph: &'a HashMap<&'a str, (&'a str, &'a str)>,
     current: &'a str,
-    directions: Cycle<Iter<'a, Direction>>,
+    directions: Cycle<Enumerate<Iter<'a, Direction>>>,
 }
 
 impl<'a> Iterator for WalkThroughDesert<'a> {
-    type Item = &'a str;
+    type Item = (usize, &'a str);
 
     fn next(&mut self) -> Option<Self::Item> {
+        let current = self.current;
+
         let (left, right) = self.graph.get(self.current)?;
-        self.current = match self.directions.next()? {
+        let (cycle_pos, direction) = self.directions.next()?;
+
+        self.current = match direction {
             Direction::Left => left,
             Direction::Right => right,
         };
 
-        Some(self.current)
+        Some((cycle_pos, current))
     }
+}
+
+fn find_cycle<T: Hash + Eq>(input: &mut dyn Iterator<Item = T>) -> Option<(usize, usize)> {
+    let mut visited = HashMap::new();
+
+    for (pos, item) in input.enumerate() {
+        if let Some(prev_pos) = visited.insert(item, pos) {
+            return Some((prev_pos, pos));
+        }
+    }
+
+    None
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
@@ -89,67 +106,61 @@ pub fn part_one(input: &str) -> Option<u32> {
 
     Some(
         day.walk_trough_desert("AAA")
-            .take_while(|&node| node != "ZZZ")
-            .count() as u32
-            + 1,
+            .take_while(|(_, node)| node != &"ZZZ")
+            .count() as u32,
     )
 }
 
-struct Multizip<T>(Vec<T>);
+pub fn part_two(input: &str) -> Option<u64> {
+    let (_, day) = parse_input(Day8::parse)(input).unwrap();
 
-impl<T> Iterator for Multizip<T>
-where
-    T: Iterator,
-{
-    type Item = Vec<T::Item>;
+    let starts = day
+        .graph
+        .keys()
+        .filter(|key| key.ends_with("A"))
+        .collect::<Vec<_>>();
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.0.iter_mut().map(Iterator::next).collect()
+    let cycles = starts
+        .iter()
+        .map(|start| find_cycle(&mut day.walk_trough_desert(start)))
+        .collect::<Vec<_>>();
+
+    let winning_positions = zip(starts.iter(), cycles.iter())
+        .filter_map(|(start, cycle)| {
+            cycle.map(|(start_pos, end_pos)| (start, (start_pos, end_pos)))
+        })
+        .map(|(start, (first, length))| {
+            day.walk_trough_desert(start)
+                .enumerate()
+                .take(length)
+                .filter(|(_, (_, node))| node.ends_with("Z"))
+                .map(|(pos, _)| pos)
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
+
+    let cycle_lengths = cycles
+        .iter()
+        .map(|cycle| cycle.map(|(start, end)| end - start))
+        .collect::<Vec<_>>();
+
+    // only solve the problem for one winning position on cycle, and ensure it's always at start
+    let is_solvable = zip(cycle_lengths.iter(), winning_positions.iter()).all(
+        |(cycle_length, winning_position)| {
+            cycle_length.is_some()
+                && winning_position.len() == 1
+                && winning_position[0] == cycle_length.unwrap()
+        },
+    );
+
+    if !is_solvable {
+        return None;
     }
-}
 
-pub fn part_two(input: &str) -> Option<u32> {
-    let (_, day) = parse_input(Day8::parse)(input).unwrap();
-
-    let starts = day
-        .graph
-        .keys()
-        .filter(|key| key.ends_with("A"))
-        .collect::<Vec<_>>();
-
-    Some(
-        Multizip(
-            starts
-                .iter()
-                .map(|start| day.walk_trough_desert(start))
-                .collect::<Vec<_>>(),
-        )
-        .take_while(|nodes| !nodes.iter().all(|node| node.ends_with("Z")))
-        .count() as u32
-            + 1,
-    )
-}
-
-pub fn part_two_brute(input: &str) -> Option<u32> {
-    let (_, day) = parse_input(Day8::parse)(input).unwrap();
-
-    let starts = day
-        .graph
-        .keys()
-        .filter(|key| key.ends_with("A"))
-        .collect::<Vec<_>>();
-
-    Some(
-        Multizip(
-            starts
-                .iter()
-                .map(|start| day.walk_trough_desert(start))
-                .collect::<Vec<_>>(),
-        )
-        .take_while(|nodes| !nodes.iter().all(|node| node.ends_with("Z")))
-        .count() as u32
-            + 1,
-    )
+    cycle_lengths
+        .iter()
+        .map(|length| length.unwrap() as u64)
+        .reduce(|a, b| lcm(a, b))
 }
 
 #[cfg(test)]

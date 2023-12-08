@@ -16,6 +16,7 @@ impl<T: Num> Location<T> {
 
 // TODO: wrong implementation
 impl<T: Num + Bounded + Copy> Location<T> {
+    #[allow(dead_code)]
     fn neighborhood(&self) -> Vec<Self> {
         vec![
             *self + Location::new(zero(), one()),
