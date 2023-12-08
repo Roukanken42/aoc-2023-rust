@@ -25,8 +25,8 @@ where
     all_consuming(terminated(f, opt(line_ending)))
 }
 
-pub trait Parsable {
-    fn parse(input: &str) -> IResult<&str, Self>
+pub trait Parsable<'a> {
+    fn parse(input: &'a str) -> IResult<&'a str, Self>
     where
         Self: Sized;
 }
@@ -34,7 +34,7 @@ pub trait Parsable {
 macro_rules! impl_parsable_uint {
     (for $($t:ty),+) => {
         $(
-            impl Parsable for $t {
+            impl<'a> Parsable<'a> for $t {
                 fn parse(input: &str) -> IResult<&str, Self> {
                     map_res(digit1, Self::from_str)(input)
                 }
@@ -45,7 +45,7 @@ macro_rules! impl_parsable_uint {
 
 impl_parsable_uint!(for u8, u16, u32, u64, u128);
 
-impl Parsable for i64 {
+impl<'a> Parsable<'a> for i64 {
     fn parse(input: &str) -> IResult<&str, Self> {
         // TODO: fix negative numbers
         map_res(digit1, i64::from_str)(input)
