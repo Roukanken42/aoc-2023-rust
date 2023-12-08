@@ -41,7 +41,7 @@ impl FromStr for CardValue {
     }
 }
 
-impl Parsable for CardValue {
+impl<'a> Parsable<'a> for CardValue {
     fn parse(input: &str) -> IResult<&str, Self> {
         map_res(one_of("23456789TJQKA"), |s: char| {
             CardValue::from_str(&s.to_string())
@@ -131,7 +131,7 @@ impl CamelCardsResult {
     }
 }
 
-impl Parsable for BetHand {
+impl<'a> Parsable<'a> for BetHand {
     fn parse(input: &str) -> IResult<&str, Self> {
         let parse_cards = count(CardValue::parse, 5);
         let (input, (cards, value)) = separated_pair(parse_cards, space1, u32::parse)(input)?;

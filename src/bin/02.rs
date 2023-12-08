@@ -30,7 +30,7 @@ impl Color {
     }
 }
 
-impl Parsable for Color {
+impl<'a> Parsable<'a> for Color {
     fn parse(input: &str) -> IResult<&str, Color> {
         alt((
             value(Red, tag("red")),
@@ -57,7 +57,7 @@ struct DiceGame {
     sets: Vec<HashMap<Color, u32>>,
 }
 
-impl Parsable for DiceGame {
+impl<'a> Parsable<'a> for DiceGame {
     fn parse(input: &str) -> IResult<&str, DiceGame> {
         let (input, _) = tag("Game ")(input)?;
         let (input, id) = u32::parse(input)?;

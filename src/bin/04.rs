@@ -18,7 +18,7 @@ struct LotteryCard {
     numbers: Vec<u32>,
 }
 
-impl Parsable for LotteryCard {
+impl<'a> Parsable<'a> for LotteryCard {
     fn parse(input: &str) -> IResult<&str, Self> {
         let mut parse_numbers = separated_list1(multispace1, u32::parse);
 

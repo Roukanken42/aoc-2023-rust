@@ -35,7 +35,7 @@ struct Day5 {
     mappings: Vec<GardenMapping>,
 }
 
-impl Parsable for MappingRange {
+impl<'a> Parsable<'a> for MappingRange {
     fn parse(input: &str) -> IResult<&str, Self> {
         let (input, (start_to, _, start_from, _, size)) =
             tuple((i64::parse, space1, i64::parse, space1, i64::parse))(input)?;
@@ -51,7 +51,7 @@ impl Parsable for MappingRange {
     }
 }
 
-impl Parsable for GardenMapping {
+impl<'a> Parsable<'a> for GardenMapping {
     fn parse(input: &str) -> IResult<&str, Self> {
         let (input, from) = take_till1(|c| c == '-')(input)?;
         let (input, _) = tag("-to-")(input)?;
@@ -65,7 +65,7 @@ impl Parsable for GardenMapping {
     }
 }
 
-impl Parsable for Day5 {
+impl<'a> Parsable<'a> for Day5 {
     fn parse(input: &str) -> IResult<&str, Self> {
         let (input, _) = tag("seeds: ")(input)?;
         let (input, seeds) = separated_list1(space1, i64::parse)(input)?;
