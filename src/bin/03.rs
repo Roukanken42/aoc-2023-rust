@@ -1,4 +1,5 @@
 use advent_of_code::utils::location::Location;
+use std::collections::HashSet;
 
 advent_of_code::solution!(3);
 
@@ -102,7 +103,29 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let data: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+
+    let mut numbers = find_numbers(&data);
+
+    Some(
+        Location::new(0, 0)
+            .iter_range(Location::new(data[0].len() as i32, data.len() as i32))
+            .filter(|loc| data.get_2d(*loc).unwrap() == &'*')
+            .map(|loc| {
+                loc.neighbours()
+                    .iter()
+                    .filter_map(|loc| numbers.locations.get_2d(*loc))
+                    .filter_map(|number| *number)
+                    .collect()
+            })
+            .filter(|set: &HashSet<_>| set.len() == 2)
+            .map(|set| {
+                set.into_iter()
+                    .map(|index| numbers.numbers.get(index).unwrap().value)
+                    .product::<u32>()
+            })
+            .sum(),
+    )
 }
 
 #[cfg(test)]

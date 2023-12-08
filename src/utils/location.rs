@@ -1,4 +1,3 @@
-use nom::ToUsize;
 use std::ops::{Add, Div, Mul, Sub};
 
 use num::{one, zero, Bounded, Num, Zero};
