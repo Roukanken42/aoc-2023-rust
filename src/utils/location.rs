@@ -1,29 +1,69 @@
+use nom::ToUsize;
 use std::ops::{Add, Div, Mul, Sub};
 
 use num::{one, zero, Bounded, Num, Zero};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Location<T: Num> {
-    x: T,
-    y: T,
+    pub x: T,
+    pub y: T,
 }
 
 impl<T: Num> Location<T> {
-    fn new(x: T, y: T) -> Self {
+    pub fn new(x: T, y: T) -> Self {
         Self { x, y }
     }
 }
 
-// TODO: wrong implementation
-impl<T: Num + Bounded + Copy> Location<T> {
+impl<T: Num + Copy + PartialOrd> Location<T> {
     #[allow(dead_code)]
-    fn neighborhood(&self) -> Vec<Self> {
+    pub fn neighbours(&self) -> Vec<Self> {
         vec![
             *self + Location::new(zero(), one()),
-            *self - Location::new(zero(), one()),
+            *self + Location::new(one(), one()),
             *self + Location::new(one(), zero()),
+            *self + Location::new(one(), zero()) - Location::new(zero(), one()),
+            *self - Location::new(zero(), one()),
+            *self - Location::new(one(), one()),
             *self - Location::new(one(), zero()),
+            *self - Location::new(one(), zero()) + Location::new(zero(), one()),
         ]
+    }
+
+    pub fn iter_range(self, end: Location<T>) -> impl Iterator<Item = Location<T>> {
+        SquareIterator {
+            next: self,
+            next_row: self + Location::new(zero(), one()),
+            end,
+        }
+    }
+}
+
+struct SquareIterator<T: Num + Copy + PartialOrd> {
+    next: Location<T>,
+    next_row: Location<T>,
+    end: Location<T>,
+}
+
+impl<T: Num + Copy + PartialOrd> Iterator for SquareIterator<T> {
+    type Item = Location<T>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.next.x < self.end.x {
+            let result = self.next;
+            self.next = self.next + Location::new(one(), zero());
+
+            return Some(result);
+        }
+
+        if self.next_row.y < self.end.y {
+            self.next = self.next_row;
+            self.next_row = self.next_row + Location::new(zero(), one());
+
+            return self.next();
+        }
+
+        None
     }
 }
 

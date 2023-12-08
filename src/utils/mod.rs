@@ -7,7 +7,7 @@ use nom::multi::separated_list1;
 use nom::sequence::terminated;
 use nom::{IResult, Parser};
 
-mod location;
+pub mod location;
 
 pub fn parse_input_by_lines<'a, O, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&str, Vec<O>, E>
 where
