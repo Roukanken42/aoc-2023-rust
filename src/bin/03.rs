@@ -4,6 +4,7 @@ advent_of_code::solution!(3);
 
 trait Access2d<T> {
     fn get_2d(&self, loc: Location<i32>) -> Option<&T>;
+    fn set_2d(&mut self, loc: Location<i32>, element: T) -> Option<()>;
 }
 
 impl<T> Access2d<T> for Vec<Vec<T>> {
@@ -11,45 +12,93 @@ impl<T> Access2d<T> for Vec<Vec<T>> {
         self.get(usize::try_from(loc.y).ok()?)
             .and_then(|row| row.get(usize::try_from(loc.x).ok()?))
     }
+
+    fn set_2d(&mut self, loc: Location<i32>, element: T) -> Option<()> {
+        self.get_mut(usize::try_from(loc.y).ok()?)
+            .and_then(|row| {
+                row.insert(usize::try_from(loc.x).ok()?, element);
+                Some(())
+            })
+            .map(|_| ())
+    }
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
-    let data: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+#[derive(Debug, Copy, Clone)]
+struct NumberPointer {
+    value: u32,
+    has_neighbour: bool,
+}
 
-    let mut number = 0;
-    let mut has_neighbour = false;
+struct NumbersInCharMatrix {
+    numbers: Vec<NumberPointer>,
+    locations: Vec<Vec<Option<usize>>>,
+}
 
-    let mut numbers = Vec::<u32>::new();
+fn find_numbers(data: &Vec<Vec<char>>) -> NumbersInCharMatrix {
+    let mut numbers = vec![];
+    let mut number = NumberPointer {
+        value: 0,
+        has_neighbour: false,
+    };
+
+    let mut locations: Vec<Vec<Option<_>>> = data
+        .iter()
+        .map(|row| row.iter().map(|_| None).collect())
+        .collect();
 
     for location in
         Location::new(0, 0).iter_range(Location::new(data[0].len() as i32, data.len() as i32))
     {
         let char = data.get_2d(location).unwrap();
 
-        match char {
-            '0'..='9' => number = number * 10 + char.to_digit(10).unwrap(),
-            _ => {
-                if has_neighbour && number != 0 {
-                    numbers.push(number)
-                }
-                number = 0;
-                has_neighbour = false;
-                continue;
-            }
-        };
+        if !('0'..='9').contains(char) || location.x == 0 {
+            numbers.push(number);
+            number = NumberPointer {
+                value: 0,
+                has_neighbour: false,
+            };
+        }
 
-        location
-            .neighbours()
-            .iter()
-            .filter_map(|loc| data.get_2d(*loc))
-            .for_each(|char| match char {
-                '0'..='9' => {}
-                '.' => {}
-                _ => has_neighbour = true,
-            });
+        if ('0'..='9').contains(char) {
+            number.value = number.value * 10 + char.to_digit(10).unwrap();
+            locations.set_2d(location, Some(numbers.len()));
+        }
     }
 
-    Some(numbers.into_iter().sum())
+    numbers.push(number);
+
+    NumbersInCharMatrix { numbers, locations }
+}
+
+pub fn part_one(input: &str) -> Option<u32> {
+    let data: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+
+    let mut numbers = find_numbers(&data);
+
+    for location in
+        Location::new(0, 0).iter_range(Location::new(data[0].len() as i32, data.len() as i32))
+    {
+        if let Some(number) = numbers.locations.get_2d(location).unwrap() {
+            location
+                .neighbours()
+                .iter()
+                .filter_map(|loc| data.get_2d(*loc))
+                .for_each(|char| match char {
+                    '0'..='9' => {}
+                    '.' => {}
+                    _ => numbers.numbers[*number].has_neighbour = true,
+                });
+        }
+    }
+
+    Some(
+        numbers
+            .numbers
+            .into_iter()
+            .filter(|a| a.has_neighbour)
+            .map(|a| a.value)
+            .sum(),
+    )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
