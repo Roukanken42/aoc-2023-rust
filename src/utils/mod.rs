@@ -1,10 +1,11 @@
 use std::str::FromStr;
 
-use nom::character::complete::{digit1, line_ending};
-use nom::combinator::{all_consuming, map_res, opt};
+use nom::bytes::complete::is_a;
+use nom::character::complete::{digit1, line_ending, space1};
+use nom::combinator::{all_consuming, map_res, opt, recognize};
 use nom::error::ParseError;
 use nom::multi::separated_list1;
-use nom::sequence::terminated;
+use nom::sequence::{pair, terminated};
 use nom::{IResult, Parser};
 
 pub mod location;
@@ -45,9 +46,22 @@ macro_rules! impl_parsable_uint {
 
 impl_parsable_uint!(for u8, u16, u32, u64, u128);
 
-impl<'a> Parsable<'a> for i64 {
-    fn parse(input: &str) -> IResult<&str, Self> {
-        // TODO: fix negative numbers
-        map_res(digit1, i64::from_str)(input)
+macro_rules! impl_parsable_int {
+    (for $($t:ty),+) => {
+        $(
+            impl<'a> Parsable<'a> for $t {
+                fn parse(input: &str) -> IResult<&str, Self> {
+                    map_res(recognize(pair(opt(is_a("-")), digit1)), Self::from_str)(input)
+                }
+            }
+        )+
+    };
+}
+
+impl_parsable_int!(for i8, i16, i32, i64, i128);
+
+impl<'a, T: Parsable<'a>> Parsable<'a> for Vec<T> {
+    fn parse(input: &'a str) -> IResult<&'a str, Self> {
+        separated_list1(space1, T::parse)(input)
     }
 }
