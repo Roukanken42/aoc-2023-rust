@@ -133,7 +133,7 @@ impl<T> Access2d<T> for Vec<Vec<T>> {
     fn set_2d(&mut self, loc: Location<i32>, element: T) -> Option<()> {
         self.get_mut(usize::try_from(loc.y).ok()?)
             .and_then(|row| {
-                row.insert(usize::try_from(loc.x).ok()?, element);
+                row[usize::try_from(loc.x).ok()?] = element;
                 Some(())
             })
             .map(|_| ())
