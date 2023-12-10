@@ -9,7 +9,7 @@ pub struct Location<T: Num> {
 }
 
 impl<T: Num> Location<T> {
-    pub fn new(x: T, y: T) -> Self {
+    pub const fn new(x: T, y: T) -> Self {
         Self { x, y }
     }
 }
@@ -119,12 +119,23 @@ impl<T: Num + Bounded> Bounded for Location<T> {
 }
 
 // TODO: move elsewhere
-pub trait Utils2d<T> {
-    fn get_2d(&self, loc: Location<usize>) -> Option<&T>;
+pub trait Access2d<T> {
+    fn get_2d(&self, loc: Location<i32>) -> Option<&T>;
+    fn set_2d(&mut self, loc: Location<i32>, element: T) -> Option<()>;
 }
 
-impl<T> Utils2d<T> for Vec<Vec<T>> {
-    fn get_2d(&self, loc: Location<usize>) -> Option<&T> {
-        self.get(loc.y).and_then(|row| row.get(loc.x))
+impl<T> Access2d<T> for Vec<Vec<T>> {
+    fn get_2d(&self, loc: Location<i32>) -> Option<&T> {
+        self.get(usize::try_from(loc.y).ok()?)
+            .and_then(|row| row.get(usize::try_from(loc.x).ok()?))
+    }
+
+    fn set_2d(&mut self, loc: Location<i32>, element: T) -> Option<()> {
+        self.get_mut(usize::try_from(loc.y).ok()?)
+            .and_then(|row| {
+                row.insert(usize::try_from(loc.x).ok()?, element);
+                Some(())
+            })
+            .map(|_| ())
     }
 }

@@ -1,28 +1,7 @@
-use advent_of_code::utils::location::Location;
+use advent_of_code::utils::location::{Access2d, Location};
 use std::collections::HashSet;
 
 advent_of_code::solution!(3);
-
-trait Access2d<T> {
-    fn get_2d(&self, loc: Location<i32>) -> Option<&T>;
-    fn set_2d(&mut self, loc: Location<i32>, element: T) -> Option<()>;
-}
-
-impl<T> Access2d<T> for Vec<Vec<T>> {
-    fn get_2d(&self, loc: Location<i32>) -> Option<&T> {
-        self.get(usize::try_from(loc.y).ok()?)
-            .and_then(|row| row.get(usize::try_from(loc.x).ok()?))
-    }
-
-    fn set_2d(&mut self, loc: Location<i32>, element: T) -> Option<()> {
-        self.get_mut(usize::try_from(loc.y).ok()?)
-            .and_then(|row| {
-                row.insert(usize::try_from(loc.x).ok()?, element);
-                Some(())
-            })
-            .map(|_| ())
-    }
-}
 
 #[derive(Debug, Copy, Clone)]
 struct NumberPointer {
