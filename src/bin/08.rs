@@ -129,7 +129,7 @@ pub fn part_two(input: &str) -> Option<u64> {
         .filter_map(|(start, cycle)| {
             cycle.map(|(start_pos, end_pos)| (start, (start_pos, end_pos)))
         })
-        .map(|(start, (first, length))| {
+        .map(|(start, (_, length))| {
             day.walk_trough_desert(start)
                 .enumerate()
                 .take(length)

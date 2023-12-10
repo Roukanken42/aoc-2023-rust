@@ -4,7 +4,7 @@ use itertools::Itertools;
 use nom::bytes::complete::{tag, take_till1};
 use nom::character::complete::{line_ending, space1};
 use nom::multi::{count, separated_list1};
-use nom::sequence::{tuple, Tuple};
+use nom::sequence::tuple;
 use nom::IResult;
 
 use advent_of_code::utils::parse_input;

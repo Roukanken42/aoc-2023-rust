@@ -84,7 +84,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 pub fn part_two(input: &str) -> Option<u32> {
     let data: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
 
-    let mut numbers = find_numbers(&data);
+    let numbers = find_numbers(&data);
 
     Some(
         Location::new(0, 0)

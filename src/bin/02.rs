@@ -4,8 +4,8 @@ use std::str::FromStr;
 
 use nom::branch::alt;
 use nom::bytes::complete::tag;
-use nom::character::complete::{char, digit1};
-use nom::combinator::{map, map_res, value};
+use nom::character::complete::char;
+use nom::combinator::{map, value};
 use nom::multi::separated_list1;
 use nom::sequence::separated_pair;
 use nom::IResult;
@@ -123,8 +123,9 @@ pub fn part_two(input: &str) -> Option<u32> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use advent_of_code::utils::Parsable;
+
+    use super::*;
 
     #[test]
     fn test_color_parse() {

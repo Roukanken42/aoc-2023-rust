@@ -2,8 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
 use nom::bytes::complete::{is_a, tag};
-use nom::character::complete::{digit1, multispace0, multispace1};
-use nom::combinator::map_res;
+use nom::character::complete::{multispace0, multispace1};
 use nom::multi::separated_list1;
 use nom::sequence::tuple;
 use nom::IResult;
