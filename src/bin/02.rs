@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::slice::Iter;
-use std::str::FromStr;
 
 use nom::branch::alt;
 use nom::bytes::complete::tag;
