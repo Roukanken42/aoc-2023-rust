@@ -44,7 +44,7 @@ macro_rules! impl_parsable_uint {
     };
 }
 
-impl_parsable_uint!(for u8, u16, u32, u64, u128);
+impl_parsable_uint!(for u8, u16, u32, u64, u128, usize);
 
 macro_rules! impl_parsable_int {
     (for $($t:ty),+) => {
