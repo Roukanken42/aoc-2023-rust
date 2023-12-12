@@ -1,6 +1,7 @@
-use itertools::Itertools;
+use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
 
+use itertools::Itertools;
 use nom::branch::alt;
 use nom::character::complete::{char, space1};
 use nom::combinator::value;
@@ -54,30 +55,26 @@ impl Parsable<'_> for Day12 {
     }
 }
 
-fn try_a_lot(springs: &[Spring], sizes: &[usize], ident: usize) -> usize {
-    // the sizes don't fit in the springs
+fn try_a_lot(springs: &[Spring], sizes: &[usize], ident: usize) -> u64 {
     if springs.len() + 1 < sizes.iter().sum::<usize>() + sizes.len() {
         return 0;
     }
 
-    // we placed all the sizes and left no broken springs
     if sizes.is_empty() {
-        let res = if !springs.iter().any(|&spring| spring == Spring::Broken) {
+        return if !springs.iter().any(|&spring| spring == Spring::Broken) {
             1
         } else {
             0
         };
-        return res;
     }
 
-    // we have size to place, but no place to place it
     if springs.iter().all(|&spring| spring == Spring::Working) && !sizes.is_empty() {
         return 0;
     }
 
     let next_size = sizes[0];
 
-    let res = (0..springs.len())
+    (0..springs.len())
         .take_while_inclusive(|&index| springs[index] != Spring::Broken)
         .map(|index| {
             if index + next_size > springs.len() {
@@ -103,19 +100,94 @@ fn try_a_lot(springs: &[Spring], sizes: &[usize], ident: usize) -> usize {
                 try_a_lot(&springs[index + next_size + 1..], &sizes[1..], ident + 1)
             }
         })
-        .sum();
-
-    res
+        .sum()
 }
 
 impl Day12 {
-    fn calculate_possible_arrangements(&self) -> usize {
-        println!();
+    fn calculate_possible_arrangements(&self) -> u64 {
         try_a_lot(&self.springs, &self.broken_lengths, 0)
+    }
+
+    fn calculate_possible_arrangements_dynamic(&self) -> u64 {
+        let mut state = HashMap::<(usize, usize, usize), u64>::new();
+
+        state.insert((0, 0, 0), 1);
+
+        for pos in 0..self.springs.len() {
+            let spring = self.springs[pos];
+
+            for groups_pos in 0..=self.broken_lengths.len() {
+                let group = self.broken_lengths.get(groups_pos).copied();
+
+                for current_len in 0..=group.unwrap_or(0) {
+                    let current = state
+                        .get(&(pos, groups_pos, current_len))
+                        .copied()
+                        .unwrap_or(0);
+
+                    if current == 0 {
+                        continue;
+                    }
+
+                    if spring != Spring::Broken {
+                        let dont_have_active_group = current_len == 0;
+                        let can_end_active_group = if let Some(group) = group {
+                            current_len == group
+                        } else {
+                            false
+                        };
+
+                        if dont_have_active_group {
+                            *state.entry((pos + 1, groups_pos, 0)).or_insert(0) += current;
+                        }
+
+                        if can_end_active_group {
+                            *state.entry((pos + 1, groups_pos + 1, 0)).or_insert(0) += current;
+                        }
+                    }
+
+                    if spring != Spring::Working {
+                        *state
+                            .entry((pos + 1, groups_pos, current_len + 1))
+                            .or_insert(0) += current;
+                    }
+                }
+            }
+        }
+
+        state
+            .get(&(self.springs.len(), self.broken_lengths.len(), 0))
+            .copied()
+            .unwrap_or(0)
+    }
+
+    fn unfold(self, times: usize) -> Day12 {
+        let springs = self
+            .springs
+            .iter()
+            .chain([Spring::Unknown].iter())
+            .cycle()
+            .take(self.springs.len() * times + times - 1)
+            .chain([Spring::Working].iter())
+            .copied()
+            .collect_vec();
+
+        let broken_lengths = self
+            .broken_lengths
+            .iter()
+            .cycle()
+            .take(self.broken_lengths.len() * times)
+            .copied()
+            .collect_vec();
+
+        Day12 {
+            springs,
+            broken_lengths,
+        }
     }
 }
 
-pub fn part_one(input: &str) -> Option<usize> {
+pub fn part_one(input: &str) -> Option<u64> {
     let (_, data) = parse_input_by_lines(Day12::parse)(input).unwrap();
 
     Some(
@@ -125,8 +197,15 @@ pub fn part_one(input: &str) -> Option<usize> {
     )
 }
 
-pub fn part_two(_input: &str) -> Option<u32> {
-    None
+pub fn part_two(input: &str) -> Option<u64> {
+    let (_, data) = parse_input_by_lines(Day12::parse)(input).unwrap();
+
+    Some(
+        data.into_iter()
+            .map(|day| day.unfold(5))
+            .map(|day| day.calculate_possible_arrangements_dynamic())
+            .sum(),
+    )
 }
 
 #[cfg(test)]
@@ -136,12 +215,12 @@ mod tests {
     #[test]
     fn test_part_one() {
         let result = part_one(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(21));
     }
 
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(525152));
     }
 }
