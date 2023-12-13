@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 advent_of_code::solution!(1);
 
 fn get_digits(input: &str) -> Vec<u32> {
@@ -42,6 +44,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(
         input
             .lines()
+            .par_bridge()
             .map(|line| get_digits(line))
             .map(|digits| digits.first().unwrap() * 10 + digits.last().unwrap())
             .sum(),
@@ -52,6 +55,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(
         input
             .lines()
+            .par_bridge()
             .map(|line| get_digits_spelled(line))
             .map(|(first, last)| first * 10 + last)
             .sum(),

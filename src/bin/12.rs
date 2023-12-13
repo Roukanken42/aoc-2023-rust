@@ -7,6 +7,7 @@ use nom::character::complete::{char, space1};
 use nom::combinator::value;
 use nom::multi::{many1, separated_list1};
 use nom::IResult;
+use rayon::prelude::*;
 
 use advent_of_code::utils::{parse_input_by_lines, Parsable};
 
@@ -191,7 +192,7 @@ pub fn part_one(input: &str) -> Option<u64> {
     let (_, data) = parse_input_by_lines(Day12::parse)(input).unwrap();
 
     Some(
-        data.iter()
+        data.into_par_iter()
             .map(|day| day.calculate_possible_arrangements())
             .sum(),
     )
@@ -201,7 +202,7 @@ pub fn part_two(input: &str) -> Option<u64> {
     let (_, data) = parse_input_by_lines(Day12::parse)(input).unwrap();
 
     Some(
-        data.into_iter()
+        data.into_par_iter()
             .map(|day| day.unfold(5))
             .map(|day| day.calculate_possible_arrangements_dynamic())
             .sum(),
