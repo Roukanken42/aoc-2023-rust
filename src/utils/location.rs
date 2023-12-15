@@ -1,6 +1,7 @@
-use std::ops::{Add, Div, Mul, Sub};
+use std::iter::successors;
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
-use num::{one, zero, Bounded, Num, Zero};
+use num::{one, zero, Bounded, Num, Signed, Zero};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Location<T: Num> {
@@ -15,7 +16,6 @@ impl<T: Num> Location<T> {
 }
 
 impl<T: Num + Copy + PartialOrd> Location<T> {
-    #[allow(dead_code)]
     pub fn neighbours(&self) -> Vec<Self> {
         vec![
             *self + Location::new(zero(), one()),
@@ -29,12 +29,16 @@ impl<T: Num + Copy + PartialOrd> Location<T> {
         ]
     }
 
-    pub fn iter_range(self, end: Location<T>) -> impl Iterator<Item = Location<T>> {
+    pub fn iter_range(self, end: Location<T>) -> SquareIterator<T> {
         SquareIterator {
             next: self,
             next_row: self + Location::new(zero(), one()),
             end,
         }
+    }
+
+    pub fn iter_ray(self, direction: Location<T>) -> impl Iterator<Item = Location<T>> {
+        successors(Some(self), move |&current| Some(current + direction))
     }
 }
 
@@ -118,10 +122,61 @@ impl<T: Num + Bounded> Bounded for Location<T> {
     }
 }
 
+impl<T: Num + Copy + Signed> Neg for Location<T> {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Location::new(-self.x, -self.y)
+    }
+}
+
+// macro_rules! impl_location_from {
+//     (for $($t:ty),+) => {
+//         $(
+//             impl<T: From<$t>> From<Location<$t>> for Location<T> {
+//                 fn from(location: Location<$t>) -> Self {
+//                     Location::new(location.x.into(), location.y.into())
+//                 }
+//             }
+//
+//             impl<T: TryFrom<$t>> TryFrom<Location<$t>> for Location<T> {
+//                 type Error = <T as TryFrom<$t>>::Error;
+//
+//                 fn try_from(location: Location<$t>) -> Result<Self, Self::Error> {
+//                     Ok(Location::new(
+//                         T::try_from(location.x)?,
+//                         T::try_from(location.y)?,
+//                     ))
+//                 }
+//             }
+//         )+
+//     };
+// }
+//
+// impl_location_from!(for u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
+
+impl<T: Into<F>, F> From<Location<F>> for Location<T> {
+    fn from(location: Location<F>) -> Self {
+        Location::new(location.x.into(), location.y.into())
+    }
+}
+
+// impl<T: TryFrom<F>, F> TryFrom<Location<F>> for Location<T> {
+//     type Error = <T as TryFrom<F>>::Error;
+//
+//     fn try_from(location: Location<F>) -> Result<Self, Self::Error> {
+//         Ok(Location::new(
+//             T::try_from(location.x)?,
+//             T::try_from(location.y)?,
+//         ))
+//     }
+// }
+
 // TODO: move elsewhere
 pub trait Access2d<T> {
     fn get_2d(&self, loc: Location<i32>) -> Option<&T>;
     fn set_2d(&mut self, loc: Location<i32>, element: T) -> Option<()>;
+    fn iter_2d_keys(&self) -> SquareIterator<T>;
 }
 
 impl<T> Access2d<T> for Vec<Vec<T>> {
@@ -137,5 +192,9 @@ impl<T> Access2d<T> for Vec<Vec<T>> {
                 Some(())
             })
             .map(|_| ())
+    }
+
+    fn iter_2d_keys(&self) -> SquareIterator<usize> {
+        Location::new(0, 0).iter_range(Location::new(self[0].len(), self.len()))
     }
 }

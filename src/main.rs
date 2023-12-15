@@ -1,3 +1,5 @@
+#![feature(auto_traits)]
+
 use advent_of_code::template::commands::{all, download, read, scaffold, solve};
 use args::{parse, AppArguments};
 
