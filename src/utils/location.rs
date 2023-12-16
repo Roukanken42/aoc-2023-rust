@@ -42,7 +42,7 @@ impl<T: Num + Copy + PartialOrd> Location<T> {
     }
 }
 
-struct SquareIterator<T: Num + Copy + PartialOrd> {
+pub struct SquareIterator<T: Num + Copy + PartialOrd> {
     next: Location<T>,
     next_row: Location<T>,
     end: Location<T>,
@@ -130,53 +130,11 @@ impl<T: Num + Copy + Signed> Neg for Location<T> {
     }
 }
 
-// macro_rules! impl_location_from {
-//     (for $($t:ty),+) => {
-//         $(
-//             impl<T: From<$t>> From<Location<$t>> for Location<T> {
-//                 fn from(location: Location<$t>) -> Self {
-//                     Location::new(location.x.into(), location.y.into())
-//                 }
-//             }
-//
-//             impl<T: TryFrom<$t>> TryFrom<Location<$t>> for Location<T> {
-//                 type Error = <T as TryFrom<$t>>::Error;
-//
-//                 fn try_from(location: Location<$t>) -> Result<Self, Self::Error> {
-//                     Ok(Location::new(
-//                         T::try_from(location.x)?,
-//                         T::try_from(location.y)?,
-//                     ))
-//                 }
-//             }
-//         )+
-//     };
-// }
-//
-// impl_location_from!(for u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
-
-impl<T: Into<F>, F> From<Location<F>> for Location<T> {
-    fn from(location: Location<F>) -> Self {
-        Location::new(location.x.into(), location.y.into())
-    }
-}
-
-// impl<T: TryFrom<F>, F> TryFrom<Location<F>> for Location<T> {
-//     type Error = <T as TryFrom<F>>::Error;
-//
-//     fn try_from(location: Location<F>) -> Result<Self, Self::Error> {
-//         Ok(Location::new(
-//             T::try_from(location.x)?,
-//             T::try_from(location.y)?,
-//         ))
-//     }
-// }
-
 // TODO: move elsewhere
 pub trait Access2d<T> {
     fn get_2d(&self, loc: Location<i32>) -> Option<&T>;
     fn set_2d(&mut self, loc: Location<i32>, element: T) -> Option<()>;
-    fn iter_2d_keys(&self) -> SquareIterator<T>;
+    fn iter_2d_keys(&self) -> SquareIterator<usize>;
 }
 
 impl<T> Access2d<T> for Vec<Vec<T>> {
