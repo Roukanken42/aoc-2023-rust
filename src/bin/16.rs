@@ -51,27 +51,33 @@ impl Ray {
         }
     }
 
-    fn step_straight(&self) -> Self {
+    fn go_straight(&self) -> Self {
         Self::new(self.location + self.direction, self.direction)
     }
 
-    fn step(&self, tile: &Tile) -> Vec<Self> {
-        let ray_straight = self.step_straight();
-        let ray_left = Ray::new(self.location, self.direction.rotate_90_ccw()).step_straight();
-        let ray_right = Ray::new(self.location, self.direction.rotate_90_cw()).step_straight();
+    fn go_right(&self) -> Ray {
+        let direction_right = self.direction.rotate_90_cw();
+        Ray::new(self.location + direction_right, direction_right)
+    }
 
+    fn go_left(&self) -> Ray {
+        let direction_left = self.direction.rotate_90_ccw();
+        Ray::new(self.location + direction_left, direction_left)
+    }
+
+    fn step(&self, tile: &Tile) -> (Self, Option<Self>) {
         let direction_is_horizontal = self.direction.x != 0;
 
         match (tile, direction_is_horizontal) {
-            (Tile::Empty, _) => vec![ray_straight],
-            (Tile::VerticalSplitter, false) => vec![ray_straight],
-            (Tile::VerticalSplitter, true) => vec![ray_left, ray_right],
-            (Tile::HorizontalSplitter, true) => vec![ray_straight],
-            (Tile::HorizontalSplitter, false) => vec![ray_left, ray_right],
-            (Tile::DownwardsMirror, true) => vec![ray_right],
-            (Tile::DownwardsMirror, false) => vec![ray_left],
-            (Tile::UpwardsMirror, true) => vec![ray_left],
-            (Tile::UpwardsMirror, false) => vec![ray_right],
+            (Tile::Empty, _) => (self.go_straight(), None),
+            (Tile::VerticalSplitter, false) => (self.go_straight(), None),
+            (Tile::VerticalSplitter, true) => (self.go_left(), Some(self.go_right())),
+            (Tile::HorizontalSplitter, true) => (self.go_straight(), None),
+            (Tile::HorizontalSplitter, false) => (self.go_left(), Some(self.go_right())),
+            (Tile::DownwardsMirror, true) => (self.go_right(), None),
+            (Tile::DownwardsMirror, false) => (self.go_left(), None),
+            (Tile::UpwardsMirror, true) => (self.go_left(), None),
+            (Tile::UpwardsMirror, false) => (self.go_right(), None),
         }
     }
 }
@@ -86,8 +92,11 @@ fn brute_raytrace(data: &Vec<Vec<Tile>>, starting_ray: Ray) -> usize {
                 continue;
             }
 
-            let new_rays = ray.step(tile);
-            unprocessed_rays.extend(new_rays);
+            let (a, b) = ray.step(tile);
+            unprocessed_rays.push(a);
+            if let Some(b) = b {
+                unprocessed_rays.push(b);
+            }
         }
     }
 
