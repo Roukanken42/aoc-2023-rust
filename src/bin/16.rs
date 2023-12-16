@@ -6,6 +6,7 @@ use nom::bytes::complete::tag;
 use nom::combinator::value;
 use nom::multi::many1;
 use nom::IResult;
+use rayon::prelude::*;
 
 use advent_of_code::utils::location::{direction, Access2d, Location};
 use advent_of_code::utils::{parse_input_by_lines, Parsable};
@@ -129,8 +130,8 @@ pub fn part_two(input: &str) -> Option<usize> {
         .collect_vec();
 
     starting_rays
-        .iter()
-        .map(|ray| brute_raytrace(&data, *ray))
+        .into_par_iter()
+        .map(|ray| brute_raytrace(&data, ray))
         .max()
 }
 
