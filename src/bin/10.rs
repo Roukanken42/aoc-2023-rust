@@ -4,15 +4,10 @@ use std::iter::{repeat_with, RepeatWith};
 use itertools::Itertools;
 use num::Zero;
 
+use advent_of_code::utils::location::direction::*;
 use advent_of_code::utils::location::{Access2d, Location};
 
 advent_of_code::solution!(10);
-
-static ZERO: Location<i32> = Location::new(0, 0);
-static LEFT: Location<i32> = Location::new(-1, 0);
-static RIGHT: Location<i32> = Location::new(1, 0);
-static UP: Location<i32> = Location::new(0, -1);
-static DOWN: Location<i32> = Location::new(0, 1);
 
 fn turn(direction: Location<i32>, tile: char) -> Option<Location<i32>> {
     match (tile, direction) {

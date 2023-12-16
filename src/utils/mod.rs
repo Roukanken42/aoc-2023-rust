@@ -58,7 +58,7 @@ macro_rules! impl_parsable_int {
     };
 }
 
-impl_parsable_int!(for i8, i16, i32, i64, i128);
+impl_parsable_int!(for i8, i16, i32, i64, i128, isize);
 
 impl<'a, T: Parsable<'a>> Parsable<'a> for Vec<T> {
     fn parse(input: &'a str) -> IResult<&'a str, Self> {

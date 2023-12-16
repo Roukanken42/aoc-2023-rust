@@ -19,3 +19,4 @@ nom = { version = "7.1.3", features = [] }
 itertools = { version = "0.12.0", features = [] }
 num = "0.4.1"
 rayon = "1.8.0"
+memoize = "0.4.1"

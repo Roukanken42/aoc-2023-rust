@@ -3,7 +3,7 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use num::{one, zero, Bounded, Num, Signed, Zero};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Location<T: Num> {
     pub x: T,
     pub y: T,
@@ -12,6 +12,16 @@ pub struct Location<T: Num> {
 impl<T: Num> Location<T> {
     pub const fn new(x: T, y: T) -> Self {
         Self { x, y }
+    }
+}
+
+impl<T: Num + Signed> Location<T> {
+    pub fn rotate_90_ccw(self) -> Self {
+        Location::new(self.y, -self.x)
+    }
+
+    pub fn rotate_90_cw(self) -> Self {
+        Location::new(-self.y, self.x)
     }
 }
 
@@ -155,4 +165,14 @@ impl<T> Access2d<T> for Vec<Vec<T>> {
     fn iter_2d_keys(&self) -> SquareIterator<usize> {
         Location::new(0, 0).iter_range(Location::new(self[0].len(), self.len()))
     }
+}
+
+pub mod direction {
+    use crate::utils::location::Location;
+
+    pub const ZERO: Location<i32> = Location::new(0, 0);
+    pub const LEFT: Location<i32> = Location::new(-1, 0);
+    pub const RIGHT: Location<i32> = Location::new(1, 0);
+    pub const UP: Location<i32> = Location::new(0, -1);
+    pub const DOWN: Location<i32> = Location::new(0, 1);
 }
