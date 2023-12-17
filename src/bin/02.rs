@@ -47,7 +47,7 @@ fn parse_color_map(input: &str) -> IResult<&str, HashMap<Color, u32>> {
 
     let (input, color_list) = separated_list1(tag(", "), color_count)(input)?;
 
-    return Ok((input, color_list.into_iter().collect()));
+    Ok((input, color_list.into_iter().collect()))
 }
 
 #[derive(Eq, PartialEq, Debug)]
@@ -97,7 +97,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                     color,
                     game.sets
                         .iter()
-                        .map(|set| set.get(&color).unwrap_or(&0).clone())
+                        .map(|set| *set.get(&color).unwrap_or(&0))
                         .max()
                         .unwrap_or(0),
                 )

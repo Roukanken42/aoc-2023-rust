@@ -26,7 +26,7 @@ impl Parsable<'_> for Instruction {
         let (input, name) = take_while(|c| c != '-' && c != '=' && c != '\n')(input)?;
         let (input, action) = alt((
             value(Action::Remove, tag("-")),
-            map(preceded(tag("="), u32::parse), |u| Action::Insert(u)),
+            map(preceded(tag("="), u32::parse), Action::Insert),
         ))(input)?;
 
         Ok((

@@ -137,7 +137,7 @@ impl GardenMapping {
 
     fn map_range(&self, input: &Range) -> Vec<Range> {
         let mut result = vec![];
-        let mut remaining = input.clone();
+        let mut remaining = *input;
 
         for range in &self.ranges {
             if let Some((left, mapped, right)) = range.map_range(&remaining) {
@@ -186,8 +186,7 @@ impl Day5 {
 
         let mapped = input
             .iter()
-            .map(|range| mapping.map_range(range))
-            .flatten()
+            .flat_map(|range| mapping.map_range(range))
             .collect();
 
         self.map_ranges(mapped, &mapping.to, to)

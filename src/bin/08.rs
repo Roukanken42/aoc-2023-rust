@@ -117,7 +117,7 @@ pub fn part_two(input: &str) -> Option<u64> {
     let starts = day
         .graph
         .keys()
-        .filter(|key| key.ends_with("A"))
+        .filter(|key| key.ends_with('A'))
         .collect::<Vec<_>>();
 
     let cycles = starts
@@ -133,7 +133,7 @@ pub fn part_two(input: &str) -> Option<u64> {
             day.walk_trough_desert(start)
                 .enumerate()
                 .take(length)
-                .filter(|(_, (_, node))| node.ends_with("Z"))
+                .filter(|(_, (_, node))| node.ends_with('Z'))
                 .map(|(pos, _)| pos)
                 .collect::<Vec<_>>()
         })
@@ -160,7 +160,7 @@ pub fn part_two(input: &str) -> Option<u64> {
     cycle_lengths
         .iter()
         .map(|length| length.unwrap() as u64)
-        .reduce(|a, b| lcm(a, b))
+        .reduce(lcm)
 }
 
 #[cfg(test)]

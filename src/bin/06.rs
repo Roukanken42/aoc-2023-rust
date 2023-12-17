@@ -35,7 +35,7 @@ pub fn part_one(input: &str) -> Option<u64> {
     Some(
         times
             .into_iter()
-            .zip(distances.into_iter())
+            .zip(distances)
             .map(|(time, distance)| solve(time, distance))
             .product(),
     )

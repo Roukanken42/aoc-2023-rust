@@ -16,7 +16,6 @@ fn count_row_expansion(data: &Vec<Vec<char>>) -> Vec<i64> {
 
 fn count_cols_expansion(data: &Vec<Vec<char>>) -> Vec<i64> {
     (0..data[0].len())
-        .into_iter()
         .scan(0, |state, col| {
             if data.iter().map(|row| row[col]).all(|c| c == '.') {
                 *state += 1;
@@ -27,8 +26,8 @@ fn count_cols_expansion(data: &Vec<Vec<char>>) -> Vec<i64> {
 }
 
 fn calculate_galaxy_coordinates(data: &Vec<Vec<char>>, expansion: i64) -> Vec<Location<i64>> {
-    let rows_expansion = count_row_expansion(&data);
-    let cols_expansion = count_cols_expansion(&data);
+    let rows_expansion = count_row_expansion(data);
+    let cols_expansion = count_cols_expansion(data);
 
     Location::new(0, 0)
         .iter_range(Location::new(data[0].len() as i32, data.len() as i32))

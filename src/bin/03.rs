@@ -31,7 +31,7 @@ fn find_numbers(data: &Vec<Vec<char>>) -> NumbersInCharMatrix {
     {
         let char = data.get_2d(location).unwrap();
 
-        if !('0'..='9').contains(char) || location.x == 0 {
+        if !char.is_ascii_digit() || location.x == 0 {
             numbers.push(number);
             number = NumberPointer {
                 value: 0,
@@ -39,7 +39,7 @@ fn find_numbers(data: &Vec<Vec<char>>) -> NumbersInCharMatrix {
             };
         }
 
-        if ('0'..='9').contains(char) {
+        if char.is_ascii_digit() {
             number.value = number.value * 10 + char.to_digit(10).unwrap();
             locations.set_2d(location, Some(numbers.len()));
         }

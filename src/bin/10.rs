@@ -140,15 +140,10 @@ pub fn part_two(input: &str) -> Option<usize> {
     fill.set_2d(start_base_loc, Insides::Edge);
 
     let mut next = vec![Location::new(0, 0)];
-    while !next.is_empty() {
-        let current = next.pop().unwrap();
-
-        match fill.get_2d(current) {
-            Some(Insides::Inside) => {
-                fill.set_2d(current, Insides::Outside);
-                next.extend(current.neighbours().iter());
-            }
-            _ => {}
+    while let Some(current) = next.pop() {
+        if let Some(Insides::Inside) = fill.get_2d(current) {
+            fill.set_2d(current, Insides::Outside);
+            next.extend(current.neighbours().iter());
         }
     }
 

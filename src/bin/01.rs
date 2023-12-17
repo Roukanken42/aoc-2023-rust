@@ -37,7 +37,7 @@ fn get_digits_spelled(input: &str) -> (u32, u32) {
         .unwrap()
         .0 as u32;
 
-    return (first_digit % 9 + 1, last_digit % 9 + 1);
+    (first_digit % 9 + 1, last_digit % 9 + 1)
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
@@ -45,7 +45,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         input
             .lines()
             .par_bridge()
-            .map(|line| get_digits(line))
+            .map(get_digits)
             .map(|digits| digits.first().unwrap() * 10 + digits.last().unwrap())
             .sum(),
     )
@@ -56,7 +56,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         input
             .lines()
             .par_bridge()
-            .map(|line| get_digits_spelled(line))
+            .map(get_digits_spelled)
             .map(|(first, last)| first * 10 + last)
             .sum(),
     )
@@ -93,7 +93,7 @@ mod tests {
         "#
         .trim();
 
-        let result = part_one(&input);
+        let result = part_one(input);
         assert_eq!(result, Some(142));
     }
 

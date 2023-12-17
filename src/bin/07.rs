@@ -86,7 +86,7 @@ impl CamelCardsResult {
         }
     }
 
-    fn from_hand(hand: &Vec<CardValue>) -> Self {
+    fn from_hand(hand: &[CardValue]) -> Self {
         let counts = hand.iter().counts_by(|card| match card {
             CardValue::Value(value) => *value,
         });
@@ -114,7 +114,7 @@ impl CamelCardsResult {
         }
     }
 
-    fn from_hand_with_jokers(hand: &Vec<CardValue>) -> Self {
+    fn from_hand_with_jokers(hand: &[CardValue]) -> Self {
         let hand_without_jokers: Vec<CardValue> = hand
             .iter()
             .copied()
@@ -127,7 +127,7 @@ impl CamelCardsResult {
         let jokers = hand.len() - hand_without_jokers.len();
         let result = Self::from_hand(&hand_without_jokers);
 
-        return result.upgrade_with_jokers(jokers as u32);
+        result.upgrade_with_jokers(jokers as u32)
     }
 }
 
