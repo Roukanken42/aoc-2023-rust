@@ -1,11 +1,15 @@
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashSet};
+use std::hash::Hash;
+use std::ops::Add;
 use std::str::FromStr;
 
+use itertools::Itertools;
 use nom::character::complete::one_of;
 use nom::combinator::{map_res, recognize};
 use nom::multi::many1;
 use nom::IResult;
+use num::Zero;
 
 use advent_of_code::utils::location::{direction, Access2d, Location};
 use advent_of_code::utils::parse_input_by_lines;
@@ -165,78 +169,76 @@ pub fn part_one(input: &str) -> Option<i32> {
     None
 }
 
+fn a_star<
+    State: Ord + Hash + Eq + Copy,
+    Value: Ord + Copy + Add<Output = Value> + Zero,
+    NextIter: IntoIterator<Item = (State, Value)>,
+>(
+    starting_states: &[State],
+    is_target: impl Fn(&State) -> bool,
+    heuristics: impl Fn(&State) -> Value,
+    next_states: impl Fn(&State) -> NextIter,
+) -> Option<Value> {
+    let mut priority = BinaryHeap::from_iter(
+        starting_states
+            .into_iter()
+            .filter_map(|state| Some(Reverse((heuristics(state), Value::zero(), *state)))),
+    );
+
+    let mut visited = HashSet::new();
+
+    while let Some(Reverse((_, cost, state))) = priority.pop() {
+        if !visited.insert(state) {
+            continue;
+        }
+
+        if is_target(&state) {
+            return Some(cost);
+        }
+
+        for (next_state, next_cost) in next_states(&state) {
+            let next_total_cost = cost + next_cost;
+
+            priority.push(Reverse((
+                next_total_cost + heuristics(&next_state),
+                next_total_cost,
+                next_state,
+            )));
+        }
+    }
+
+    None
+}
+
 pub fn part_two(input: &str) -> Option<i32> {
     let (_, data) = parse(input).unwrap();
 
     let start = Location::new(0, 0);
     let target = Location::new(data[0].len() as i32 - 1, data.len() as i32 - 1);
 
-    let mut priority = BinaryHeap::new();
-    priority.push(Reverse((
-        0,
-        0,
+    let starting_states = vec![
         UltraCrucible {
             location: start,
             direction: direction::RIGHT,
             straight_count: 0,
         },
-    )));
-    priority.push(Reverse((
-        0,
-        0,
         UltraCrucible {
             location: start,
             direction: direction::DOWN,
             straight_count: 0,
         },
-    )));
+    ];
 
-    let mut visited = HashSet::new();
-    let mut results = Vec::new();
-
-    while let Some(Reverse((_, distance, state))) = priority.pop() {
-        if !visited.insert(state) {
-            continue;
-        }
-
-        let cost = match (state.location, data.get_2d(state.location)) {
-            (loc, _) if loc == start => 0,
-            (_, Some(x)) => *x,
-            (_, None) => continue,
-        };
-
-        if state.location == target && state.straight_count >= 4 {
-            return Some(distance + cost);
-        }
-
-        if let Some(next) = state.go_straight() {
-            priority.push(Reverse((
-                distance + cost + next.location.manhattan_distance(target),
-                distance + cost,
-                next,
-            )));
-        }
-
-        if let Some(left) = state.go_left() {
-            priority.push(Reverse((
-                distance + cost + left.location.manhattan_distance(target),
-                distance + cost,
-                left,
-            )));
-        }
-
-        if let Some(right) = state.go_right() {
-            priority.push(Reverse((
-                distance + cost + right.location.manhattan_distance(target),
-                distance + cost,
-                right,
-            )));
-        }
-    }
-
-    println!("{:?}", results);
-
-    results.iter().min().copied()
+    a_star(
+        &starting_states,
+        |state| state.location == target && state.straight_count >= 4,
+        |state| state.location.manhattan_distance(target),
+        |state| {
+            [state.go_straight(), state.go_left(), state.go_right()]
+                .into_iter()
+                .filter_map(|next| Some((next?, data.get_2d(next?.location).copied()?)))
+        },
+    )
 }
 
 #[cfg(test)]
