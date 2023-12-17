@@ -13,6 +13,14 @@ impl<T: Num> Location<T> {
     pub const fn new(x: T, y: T) -> Self {
         Self { x, y }
     }
+
+    pub fn map<U: Num, F: Fn(T) -> U>(self, f: F) -> Location<U> {
+        Location::new(f(self.x), f(self.y))
+    }
+
+    pub fn try_map<U: Num, E, F: Fn(T) -> Result<U, E>>(self, f: F) -> Result<Location<U>, E> {
+        Ok(Location::new(f(self.x)?, f(self.y)?))
+    }
 }
 
 impl<T: Num + Copy + Signed> Location<T> {
