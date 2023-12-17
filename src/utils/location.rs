@@ -3,7 +3,7 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use num::{one, zero, Bounded, Num, Signed, Zero};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Location<T: Num> {
     pub x: T,
     pub y: T,
@@ -22,6 +22,10 @@ impl<T: Num + Signed> Location<T> {
 
     pub fn rotate_90_cw(self) -> Self {
         Location::new(-self.y, self.x)
+    }
+
+    pub fn manhattan_distance(self, other: Self) -> T {
+        (self.x - other.x).abs() + (self.y - other.y).abs()
     }
 }
 
