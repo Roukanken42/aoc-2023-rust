@@ -4,7 +4,6 @@ use std::hash::Hash;
 use std::ops::Add;
 use std::str::FromStr;
 
-use itertools::Itertools;
 use nom::character::complete::one_of;
 use nom::combinator::{map_res, recognize};
 use nom::multi::many1;
@@ -229,10 +228,28 @@ pub fn part_two(input: &str) -> Option<i32> {
         },
     ];
 
+    let mut distances = vec![vec![0; data[0].len()]; data.len()];
+    let mut queue = BinaryHeap::from([Reverse((0, target))]);
+
+    while let Some(Reverse((distance, now))) = queue.pop() {
+        let Some(&now_cost) = data.get_2d(now) else {
+            continue;
+        };
+
+        if distances.get_2d(now).copied().unwrap_or(0) != 0 {
+            continue;
+        }
+        distances.set_2d(now, distance);
+
+        for next in now.iter_adjacent() {
+            queue.push(Reverse((distance + now_cost, next)));
+        }
+    }
+
     a_star(
         &starting_states,
         |state| state.location == target && state.straight_count >= 4,
-        |state| state.location.manhattan_distance(target),
+        |state| distances.get_2d(state.location).copied().unwrap_or(0),
         |state| {
             [state.go_straight(), state.go_left(), state.go_right()]
                 .into_iter()

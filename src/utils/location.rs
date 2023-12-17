@@ -15,7 +15,7 @@ impl<T: Num> Location<T> {
     }
 }
 
-impl<T: Num + Signed> Location<T> {
+impl<T: Num + Copy + Signed> Location<T> {
     pub fn rotate_90_ccw(self) -> Self {
         Location::new(self.y, -self.x)
     }
@@ -26,6 +26,16 @@ impl<T: Num + Signed> Location<T> {
 
     pub fn manhattan_distance(self, other: Self) -> T {
         (self.x - other.x).abs() + (self.y - other.y).abs()
+    }
+
+    pub fn iter_adjacent(self) -> impl IntoIterator<Item = Location<T>> {
+        [
+            Location::new(zero(), one::<T>()),
+            Location::new(one::<T>(), zero()),
+            Location::new(zero(), -one::<T>()),
+            Location::new(-one::<T>(), zero()),
+        ]
+        .map(move |direction| self + direction)
     }
 }
 
