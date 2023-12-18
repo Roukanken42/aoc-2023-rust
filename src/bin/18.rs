@@ -1,9 +1,11 @@
+use itertools::Itertools;
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take};
 use nom::character::complete::{char, space1};
 use nom::combinator::{map_res, value};
 use nom::sequence::{delimited, pair};
 use nom::IResult;
+use num::{Integer, Num, Signed};
 
 use advent_of_code::utils::location::{direction, Location};
 use advent_of_code::utils::{parse_input_by_lines, Parsable};
@@ -84,42 +86,40 @@ fn parse(input: &str) -> IResult<&str, Vec<DigPlan>> {
     parse_input_by_lines(DigPlan::parse)(input)
 }
 
+fn integer_area<T: Num + Signed + Integer + Copy>(movement: &[Location<T>]) -> T {
+    let mut current = Location::new(T::zero(), T::zero());
+    let mut edge_length = T::zero();
+    let mut area = T::zero();
+
+    for direction in movement {
+        edge_length = edge_length + direction.x.abs() + direction.y.abs();
+        area = area + current.y * direction.x;
+        current = current + *direction;
+    }
+
+    area.abs() + edge_length / (T::one() + T::one()) + T::one()
+}
+
 pub fn part_one(input: &str) -> Option<i32> {
     let (_, data) = parse(input).unwrap();
 
-    let mut current = Location::new(0, 0);
-    let mut edge_length = 0;
-    let mut area = 0;
-
-    for plan in data {
-        let direction = plan.direction.to_location();
-        let length = plan.length;
-
-        edge_length += length;
-        current = current + direction * length;
-        area += current.y * direction.x * length;
-    }
-
-    Some(area.abs() + edge_length / 2 + 1)
+    Some(integer_area(
+        data.iter()
+            .map(|plan| plan.direction.to_location() * plan.length)
+            .collect_vec()
+            .as_slice(),
+    ))
 }
 
 pub fn part_two(input: &str) -> Option<i64> {
     let (_, data) = parse(input).unwrap();
 
-    let mut current = Location::new(0, 0);
-    let mut edge_length = 0;
-    let mut area = 0;
-
-    for plan in data {
-        let direction = plan.decoded_direction.to_location().map(From::from);
-        let length = plan.decoded_length;
-
-        edge_length += length;
-        current = current + direction * length;
-        area += current.y * direction.x * length;
-    }
-
-    Some(area.abs() + edge_length / 2 + 1)
+    Some(integer_area(
+        data.iter()
+            .map(|plan| plan.decoded_direction.to_location().map(From::from) * plan.decoded_length)
+            .collect_vec()
+            .as_slice(),
+    ))
 }
 
 #[cfg(test)]
@@ -135,6 +135,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(952408144115));
     }
 }
