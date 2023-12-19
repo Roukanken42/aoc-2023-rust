@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Range};
 
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -62,6 +62,13 @@ impl Condition {
         match self {
             Condition::LessThan(x) => value < *x,
             Condition::MoreThan(x) => value > *x,
+        }
+    }
+
+    fn split_range(&self, range: &Range<u32>) -> (Range<u32>, Range<u32>) {
+        match self {
+            Condition::LessThan(x) => (range.start..*x, *x..range.end),
+            Condition::MoreThan(x) => ((*x + 1)..range.end, range.start..(*x + 1)),
         }
     }
 }
@@ -134,6 +141,40 @@ impl Workflow {
         }
 
         None
+    }
+
+    fn execute_range(&self, part: &PartRange) -> Vec<(WorkflowType, PartRange)> {
+        let mut result = vec![];
+        let mut current = part.clone();
+
+        for rule in self.rules.iter() {
+            match rule {
+                Rule::Conditional {
+                    attribute,
+                    condition,
+                    next,
+                } => {
+                    let (matched, unmatched) = condition.split_range(&current[*attribute]);
+                    if !matched.is_empty() {
+                        let mut next_part = current.clone();
+                        next_part[*attribute] = matched;
+                        result.push((next.clone(), next_part));
+                    }
+
+                    if unmatched.is_empty() {
+                        break;
+                    }
+
+                    current[*attribute] = unmatched;
+                }
+                Rule::Fallback { next } => {
+                    result.push((next.clone(), current.clone()));
+                    break;
+                }
+            }
+        }
+
+        result
     }
 }
 
@@ -220,6 +261,56 @@ impl Parsable<'_> for Part {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct PartRange {
+    coolness: Range<u32>,
+    musicality: Range<u32>,
+    aerodynamicity: Range<u32>,
+    shininess: Range<u32>,
+}
+
+impl PartRange {
+    fn new() -> Self {
+        Self {
+            coolness: 1..4001,
+            musicality: 1..4001,
+            aerodynamicity: 1..4001,
+            shininess: 1..4001,
+        }
+    }
+
+    fn combinations_count(&self) -> u64 {
+        self.coolness.len() as u64
+            * self.musicality.len() as u64
+            * self.aerodynamicity.len() as u64
+            * self.shininess.len() as u64
+    }
+}
+
+impl Index<Attribute> for PartRange {
+    type Output = Range<u32>;
+
+    fn index(&self, index: Attribute) -> &Self::Output {
+        match index {
+            Attribute::ExtremelyCool => &self.coolness,
+            Attribute::Musical => &self.musicality,
+            Attribute::Aerodynamic => &self.aerodynamicity,
+            Attribute::Shiny => &self.shininess,
+        }
+    }
+}
+
+impl IndexMut<Attribute> for PartRange {
+    fn index_mut(&mut self, index: Attribute) -> &mut Self::Output {
+        match index {
+            Attribute::ExtremelyCool => &mut self.coolness,
+            Attribute::Musical => &mut self.musicality,
+            Attribute::Aerodynamic => &mut self.aerodynamicity,
+            Attribute::Shiny => &mut self.shininess,
+        }
+    }
+}
+
 fn parse(input: &str) -> IResult<&str, (Vec<Workflow>, Vec<Part>)> {
     let workflows = separated_list1(line_ending, Workflow::parse);
     let sep = count(line_ending, 2);
@@ -285,8 +376,52 @@ pub fn part_one(input: &str) -> Option<u32> {
         .into()
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
-    None
+pub fn part_two(input: &str) -> Option<u64> {
+    let (_, (workflows, _)) = parse(input).unwrap();
+
+    let workflows_by_type = workflows
+        .into_iter()
+        .map(|workflow| (workflow.workflow_type.clone(), workflow))
+        .collect::<HashMap<_, _>>();
+
+    let mut queue = vec![(WorkflowType::Custom("in".to_string()), PartRange::new())];
+    let mut accepted_ranges = vec![];
+
+    while let Some((workflow_type, part_range)) = queue.pop() {
+        match workflow_type {
+            WorkflowType::Accepted => {
+                println!(
+                    "accepted {:?} -> {}",
+                    part_range,
+                    part_range.combinations_count()
+                );
+                accepted_ranges.push(part_range);
+            }
+            WorkflowType::Rejected => {
+                println!(
+                    "rejected {:?} -> -{}",
+                    part_range,
+                    part_range.combinations_count()
+                );
+            }
+            WorkflowType::Custom(_) => {
+                let vec1 = workflows_by_type[&workflow_type].execute_range(&part_range);
+                println!("[{:?}] {:?} -> {:?}", workflow_type, part_range, vec1);
+                queue.extend(vec1)
+            }
+        }
+    }
+
+    println!();
+    accepted_ranges
+        .iter()
+        .map(|part_range| {
+            let x = part_range.combinations_count();
+            println!("{:?} -> {}", part_range, x);
+            x
+        })
+        .sum::<u64>()
+        .into()
 }
 
 #[cfg(test)]
@@ -460,6 +595,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(167409079868000));
     }
 }
