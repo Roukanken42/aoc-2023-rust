@@ -389,37 +389,17 @@ pub fn part_two(input: &str) -> Option<u64> {
 
     while let Some((workflow_type, part_range)) = queue.pop() {
         match workflow_type {
-            WorkflowType::Accepted => {
-                println!(
-                    "accepted {:?} -> {}",
-                    part_range,
-                    part_range.combinations_count()
-                );
-                accepted_ranges.push(part_range);
-            }
-            WorkflowType::Rejected => {
-                println!(
-                    "rejected {:?} -> -{}",
-                    part_range,
-                    part_range.combinations_count()
-                );
-            }
+            WorkflowType::Accepted => accepted_ranges.push(part_range),
+            WorkflowType::Rejected => {}
             WorkflowType::Custom(_) => {
-                let vec1 = workflows_by_type[&workflow_type].execute_range(&part_range);
-                println!("[{:?}] {:?} -> {:?}", workflow_type, part_range, vec1);
-                queue.extend(vec1)
+                queue.extend(workflows_by_type[&workflow_type].execute_range(&part_range))
             }
         }
     }
 
-    println!();
     accepted_ranges
         .iter()
-        .map(|part_range| {
-            let x = part_range.combinations_count();
-            println!("{:?} -> {}", part_range, x);
-            x
-        })
+        .map(|part_range| part_range.combinations_count())
         .sum::<u64>()
         .into()
 }
