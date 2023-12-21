@@ -44,7 +44,7 @@ pub fn part_two(input: &str) -> Option<i64> {
     let data: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
 
     // TODO: optimize
-    let expansion = 13;
+    let expansion = 7;
     let data = data
         .iter()
         .cycle()
@@ -62,17 +62,17 @@ pub fn part_two(input: &str) -> Option<i64> {
     let start = Location::new(size / 2, size / 2);
 
     let zero = count(&data, 65, start);
-    let one = count(&data, 2 * 131 + 65, start);
-    let two = count(&data, 4 * 131 + 65, start);
+    let one = count(&data, 131 + 65, start);
+    let two = count(&data, 2 * 131 + 65, start);
 
     let c = zero;
     let a = (two - 2 * one + c) / 2;
     let b = one - a - c;
 
-    let three = count(&data, 6 * 131 + 65, start);
+    let three = count(&data, 3 * 131 + 65, start);
     assert_eq!(three, a * 3 * 3 + b * 3 + c);
 
-    Some(a * 202300 / 2 * 202300 / 2 + b * 202300 / 2 + c)
+    Some(a * 202300 * 202300 + b * 202300 + c)
 }
 
 #[cfg(test)]
