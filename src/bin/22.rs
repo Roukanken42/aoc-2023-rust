@@ -9,7 +9,6 @@ use std::cmp::{max, min};
 use std::collections::HashSet;
 advent_of_code::solution!(22);
 
-// TODO: Location3D ?
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct Brick {
     start: Location<i32>,
@@ -101,8 +100,36 @@ pub fn part_one(input: &str) -> Option<usize> {
     Some(bricks.len() - non_removable_count)
 }
 
-pub fn part_two(_input: &str) -> Option<u32> {
-    None
+pub fn part_two(input: &str) -> Option<usize> {
+    let (_, bricks) = parse_input_by_lines(Brick::parse)(input).unwrap();
+
+    let supported_by = calculate_supported_by(&bricks);
+    let mut supports = vec![HashSet::new(); bricks.len()];
+
+    for (i, supported_by) in supported_by.iter().enumerate() {
+        for support in supported_by {
+            supports[*support].insert(i);
+        }
+    }
+
+    let causes_to_fall = |id: usize| {
+        let mut causes_to_fall = HashSet::from([id]);
+        let mut queue = Vec::from_iter(supports[id].iter());
+
+        while let Some(supported_id) = queue.pop() {
+            if causes_to_fall.is_superset(&supported_by[*supported_id]) {
+                causes_to_fall.insert(*supported_id);
+                queue.extend(&supports[*supported_id]);
+            }
+        }
+
+        causes_to_fall
+    };
+
+    (0..bricks.len())
+        .map(|id| causes_to_fall(id).len() - 1)
+        .sum::<usize>()
+        .into()
 }
 
 #[cfg(test)]
