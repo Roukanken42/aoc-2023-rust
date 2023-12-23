@@ -136,8 +136,6 @@ fn construct_graph(map: &Vec<Vec<Tile>>) -> Graph {
                                 continue;
                             };
 
-                            // println!("{} -> {};", from_mark, to_mark);
-
                             graph[*from_mark].edges.push(DirectedEdge::To(*to_mark));
                             graph[*to_mark].edges.push(DirectedEdge::From(*from_mark));
                         }
@@ -219,8 +217,6 @@ fn recursive_find_longest(graph: &Graph, current: usize, visited: &mut Vec<bool>
         }
 
         let recursive = recursive_find_longest(graph, to, visited);
-        // println!("{} -> {} = {:?}", current, to, recursive);
-
         max_distance = [max_distance, recursive].into_iter().flatten().reduce(usize::max);
     }
     visited[current] = false;
