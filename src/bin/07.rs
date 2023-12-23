@@ -43,9 +43,7 @@ impl FromStr for CardValue {
 
 impl<'a> Parsable<'a> for CardValue {
     fn parse(input: &str) -> IResult<&str, Self> {
-        map_res(one_of("23456789TJQKA"), |s: char| {
-            CardValue::from_str(&s.to_string())
-        })(input)
+        map_res(one_of("23456789TJQKA"), |s: char| CardValue::from_str(&s.to_string()))(input)
     }
 }
 

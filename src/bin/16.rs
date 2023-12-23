@@ -46,10 +46,7 @@ struct Ray {
 
 impl Ray {
     fn new(location: Location<i32>, direction: Location<i32>) -> Self {
-        Self {
-            location,
-            direction,
-        }
+        Self { location, direction }
     }
 
     fn go_straight(&self) -> Self {
@@ -101,20 +98,13 @@ fn brute_raytrace(data: &Vec<Vec<Tile>>, starting_ray: Ray) -> usize {
         }
     }
 
-    processed_rays
-        .iter()
-        .map(|ray| ray.location)
-        .unique()
-        .count()
+    processed_rays.iter().map(|ray| ray.location).unique().count()
 }
 
 pub fn part_one(input: &str) -> Option<usize> {
     let (_, data) = parse(input).unwrap();
 
-    Some(brute_raytrace(
-        &data,
-        Ray::new(Location::new(0, 0), direction::RIGHT),
-    ))
+    Some(brute_raytrace(&data, Ray::new(Location::new(0, 0), direction::RIGHT)))
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
@@ -129,10 +119,7 @@ pub fn part_two(input: &str) -> Option<usize> {
         .chain((0..last_y).map(|y| Ray::new(Location::new(last_x - 1, y), direction::LEFT)))
         .collect_vec();
 
-    starting_rays
-        .into_par_iter()
-        .map(|ray| brute_raytrace(&data, ray))
-        .max()
+    starting_rays.into_par_iter().map(|ray| brute_raytrace(&data, ray)).max()
 }
 
 #[cfg(test)]

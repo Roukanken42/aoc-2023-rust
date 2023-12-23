@@ -21,14 +21,9 @@ fn find_numbers(data: &Vec<Vec<char>>) -> NumbersInCharMatrix {
         has_neighbour: false,
     };
 
-    let mut locations: Vec<Vec<Option<_>>> = data
-        .iter()
-        .map(|row| row.iter().map(|_| None).collect())
-        .collect();
+    let mut locations: Vec<Vec<Option<_>>> = data.iter().map(|row| row.iter().map(|_| None).collect()).collect();
 
-    for location in
-        Location::new(0, 0).iter_range(Location::new(data[0].len() as i32, data.len() as i32))
-    {
+    for location in Location::new(0, 0).iter_range(Location::new(data[0].len() as i32, data.len() as i32)) {
         let char = data.get_2d(location).unwrap();
 
         if !char.is_ascii_digit() || location.x == 0 {
@@ -55,9 +50,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 
     let mut numbers = find_numbers(&data);
 
-    for location in
-        Location::new(0, 0).iter_range(Location::new(data[0].len() as i32, data.len() as i32))
-    {
+    for location in Location::new(0, 0).iter_range(Location::new(data[0].len() as i32, data.len() as i32)) {
         if let Some(number) = numbers.locations.get_2d(location).unwrap() {
             location
                 .neighbours()
@@ -71,14 +64,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         }
     }
 
-    Some(
-        numbers
-            .numbers
-            .into_iter()
-            .filter(|a| a.has_neighbour)
-            .map(|a| a.value)
-            .sum(),
-    )
+    Some(numbers.numbers.into_iter().filter(|a| a.has_neighbour).map(|a| a.value).sum())
 }
 
 pub fn part_two(input: &str) -> Option<u32> {

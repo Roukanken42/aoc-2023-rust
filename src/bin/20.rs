@@ -73,11 +73,7 @@ pub fn part_one(input: &str) -> Option<u64> {
 
     let inputs = rules
         .iter()
-        .flat_map(|(_, rule)| {
-            rule.targets
-                .iter()
-                .map(|target| (target.clone(), &rule.name))
-        })
+        .flat_map(|(_, rule)| rule.targets.iter().map(|target| (target.clone(), &rule.name)))
         .into_group_map();
 
     let mut state = rules

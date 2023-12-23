@@ -27,11 +27,7 @@ fn count(data: &Vec<Vec<char>>, max_distance: i32, start: Location<i32>) -> i64 
         }
     }
 
-    visitable
-        .iter()
-        .flatten()
-        .filter(|x| x.is_some_and(|a| a))
-        .count() as i64
+    visitable.iter().flatten().filter(|x| x.is_some_and(|a| a)).count() as i64
 }
 
 pub fn part_one(input: &str) -> Option<i64> {
@@ -48,13 +44,7 @@ pub fn part_two(input: &str) -> Option<i64> {
     let data = data
         .iter()
         .cycle()
-        .map(|row| {
-            row.iter()
-                .cycle()
-                .copied()
-                .take(row.len() * expansion)
-                .collect::<Vec<_>>()
-        })
+        .map(|row| row.iter().cycle().copied().take(row.len() * expansion).collect::<Vec<_>>())
         .take(data.len() * expansion)
         .collect::<Vec<_>>();
 

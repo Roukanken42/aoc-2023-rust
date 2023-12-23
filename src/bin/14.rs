@@ -36,10 +36,7 @@ fn parse(input: &str) -> IResult<&str, Vec<Vec<Tile>>> {
 
 fn find_lowest_position<T>(data: &Vec<Vec<T>>, gravity: Location<i32>) -> Vec<Location<i32>> {
     data.iter_2d_keys()
-        .filter(|&location| {
-            data.get_2d(location.try_map(TryFrom::try_from).unwrap() + gravity)
-                .is_none()
-        })
+        .filter(|&location| data.get_2d(location.try_map(TryFrom::try_from).unwrap() + gravity).is_none())
         .filter_map(|location| location.try_map(TryFrom::try_from).ok())
         .collect_vec()
 }
@@ -78,12 +75,7 @@ fn calc_load(data: Vec<Vec<Tile>>) -> u32 {
     data.iter()
         .rev()
         .enumerate()
-        .map(|(y, row)| {
-            row.iter()
-                .filter(|&&tile| tile == Tile::RoundedRock)
-                .count() as u32
-                * (y as u32 + 1)
-        })
+        .map(|(y, row)| row.iter().filter(|&&tile| tile == Tile::RoundedRock).count() as u32 * (y as u32 + 1))
         .sum()
 }
 
@@ -114,10 +106,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     if let Some(cycle) = cycle_detected {
         let end_cycle = (1_000_000_000 - cycle.start) % cycle.len() as u32 + cycle.start;
 
-        let (end, _) = first_encountered
-            .iter()
-            .find(|(_, &value)| value == end_cycle)
-            .unwrap();
+        let (end, _) = first_encountered.iter().find(|(_, &value)| value == end_cycle).unwrap();
         data = end.clone();
     }
 

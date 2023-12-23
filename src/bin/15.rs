@@ -93,8 +93,7 @@ impl<T: Clone> Hashmap<T> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let (_, instructions) =
-        parse_input(separated_list1(tag(","), Instruction::parse))(input).unwrap();
+    let (_, instructions) = parse_input(separated_list1(tag(","), Instruction::parse))(input).unwrap();
 
     let mut hashmap = Hashmap::new();
 

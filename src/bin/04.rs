@@ -47,10 +47,7 @@ pub fn part_one(input: &str) -> Option<u32> {
             .iter()
             .map(|card| {
                 let winning: HashSet<u32> = card.winning_numbers.iter().copied().collect();
-                card.numbers
-                    .iter()
-                    .filter(|&number| winning.contains(number))
-                    .count() as u32
+                card.numbers.iter().filter(|&number| winning.contains(number)).count() as u32
             })
             .map(|count| if count > 0 { 2u32.pow(count - 1) } else { 0 })
             .sum(),
@@ -66,10 +63,7 @@ pub fn part_two(input: &str) -> Option<u32> {
             let winning: HashSet<u32> = card.winning_numbers.iter().copied().collect();
             (
                 card.id,
-                card.numbers
-                    .iter()
-                    .filter(|&number| winning.contains(number))
-                    .count() as u32,
+                card.numbers.iter().filter(|&number| winning.contains(number)).count() as u32,
             )
         })
         .collect();

@@ -35,8 +35,7 @@ fn calculate_galaxy_coordinates(data: &Vec<Vec<char>>, expansion: i64) -> Vec<Lo
         .map(|location| {
             let row = rows_expansion[location.y as usize] as i64;
             let col = cols_expansion[location.x as usize] as i64;
-            Location::new(location.x as i64, location.y as i64)
-                + (Location::new(col, row) * expansion)
+            Location::new(location.x as i64, location.y as i64) + (Location::new(col, row) * expansion)
         })
         .collect_vec()
 }

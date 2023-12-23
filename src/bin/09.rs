@@ -3,11 +3,7 @@ use advent_of_code::utils::{parse_input_by_lines, Parsable};
 advent_of_code::solution!(9);
 
 fn derive(input: &[i32]) -> Vec<i32> {
-    input
-        .iter()
-        .zip(input.iter().skip(1))
-        .map(|(a, b)| b - a)
-        .collect::<Vec<_>>()
+    input.iter().zip(input.iter().skip(1)).map(|(a, b)| b - a).collect::<Vec<_>>()
 }
 
 fn predict(input: &[i32]) -> i32 {

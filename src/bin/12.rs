@@ -46,13 +46,7 @@ impl Parsable<'_> for Day12 {
         let (input, _) = space1(input)?;
         let (input, broken_lengths) = separated_list1(char(','), usize::parse)(input)?;
 
-        Ok((
-            input,
-            Self {
-                springs,
-                broken_lengths,
-            },
-        ))
+        Ok((input, Self { springs, broken_lengths }))
     }
 }
 
@@ -121,10 +115,7 @@ impl Day12 {
                 let group = self.broken_lengths.get(groups_pos).copied();
 
                 for current_len in 0..=group.unwrap_or(0) {
-                    let current = state
-                        .get(&(pos, groups_pos, current_len))
-                        .copied()
-                        .unwrap_or(0);
+                    let current = state.get(&(pos, groups_pos, current_len)).copied().unwrap_or(0);
 
                     if current == 0 {
                         continue;
@@ -148,9 +139,7 @@ impl Day12 {
                     }
 
                     if spring != Spring::Working {
-                        *state
-                            .entry((pos + 1, groups_pos, current_len + 1))
-                            .or_insert(0) += current;
+                        *state.entry((pos + 1, groups_pos, current_len + 1)).or_insert(0) += current;
                     }
                 }
             }
@@ -181,21 +170,14 @@ impl Day12 {
             .copied()
             .collect_vec();
 
-        Day12 {
-            springs,
-            broken_lengths,
-        }
+        Day12 { springs, broken_lengths }
     }
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
     let (_, data) = parse_input_by_lines(Day12::parse)(input).unwrap();
 
-    Some(
-        data.into_par_iter()
-            .map(|day| day.calculate_possible_arrangements())
-            .sum(),
-    )
+    Some(data.into_par_iter().map(|day| day.calculate_possible_arrangements()).sum())
 }
 
 pub fn part_two(input: &str) -> Option<u64> {

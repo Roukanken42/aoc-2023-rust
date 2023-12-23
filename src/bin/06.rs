@@ -11,12 +11,10 @@ advent_of_code::solution!(6);
 
 fn parse(input: &str) -> IResult<&str, (Vec<u64>, Vec<u64>)> {
     let (input, _) = tag("Time:")(input)?;
-    let (input, times) =
-        delimited(space0, separated_list1(space1, u64::parse), line_ending)(input)?;
+    let (input, times) = delimited(space0, separated_list1(space1, u64::parse), line_ending)(input)?;
 
     let (input, _) = tag("Distance:")(input)?;
-    let (input, distances) =
-        delimited(space0, separated_list1(space1, u64::parse), line_ending)(input)?;
+    let (input, distances) = delimited(space0, separated_list1(space1, u64::parse), line_ending)(input)?;
 
     Ok((input, (times, distances)))
 }

@@ -70,8 +70,7 @@ impl<'a> Parsable<'a> for Day5 {
         let (input, _) = tag("seeds: ")(input)?;
         let (input, seeds) = separated_list1(space1, i64::parse)(input)?;
         let (input, _) = count(line_ending, 2)(input)?;
-        let (input, mappings) =
-            separated_list1(count(line_ending, 2), GardenMapping::parse)(input)?;
+        let (input, mappings) = separated_list1(count(line_ending, 2), GardenMapping::parse)(input)?;
 
         Ok((input, Day5 { seeds, mappings }))
     }
@@ -129,10 +128,7 @@ impl GardenMapping {
     }
 
     fn map(&self, input: i64) -> i64 {
-        self.ranges
-            .iter()
-            .find_map(|range| range.map(input))
-            .unwrap_or(input)
+        self.ranges.iter().find_map(|range| range.map(input)).unwrap_or(input)
     }
 
     fn map_range(&self, input: &Range) -> Vec<Range> {
@@ -164,11 +160,7 @@ impl Day5 {
             return input;
         }
 
-        let mapping = self
-            .mappings
-            .iter()
-            .find(|mapping| mapping.from == from)
-            .unwrap();
+        let mapping = self.mappings.iter().find(|mapping| mapping.from == from).unwrap();
 
         self.map(mapping.map(input), &mapping.to, to)
     }
@@ -178,16 +170,9 @@ impl Day5 {
             return input;
         }
 
-        let mapping = self
-            .mappings
-            .iter()
-            .find(|mapping| mapping.from == from)
-            .unwrap();
+        let mapping = self.mappings.iter().find(|mapping| mapping.from == from).unwrap();
 
-        let mapped = input
-            .iter()
-            .flat_map(|range| mapping.map_range(range))
-            .collect();
+        let mapped = input.iter().flat_map(|range| mapping.map_range(range)).collect();
 
         self.map_ranges(mapped, &mapping.to, to)
     }

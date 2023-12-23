@@ -19,11 +19,9 @@ struct Brick {
 
 impl Parsable<'_> for Brick {
     fn parse(input: &str) -> IResult<&str, Self> {
-        let parse_coords =
-            |input| tuple((i32::parse, tag(","), i32::parse, tag(","), i32::parse))(input);
+        let parse_coords = |input| tuple((i32::parse, tag(","), i32::parse, tag(","), i32::parse))(input);
 
-        let (input, (coords1, coords2)) =
-            separated_pair(parse_coords, tag("~"), parse_coords)(input)?;
+        let (input, (coords1, coords2)) = separated_pair(parse_coords, tag("~"), parse_coords)(input)?;
         let (x1, _, z1, _, y1) = coords1;
         let (x2, _, z2, _, y2) = coords2;
 
@@ -50,8 +48,7 @@ fn calculate_supported_by(bricks: &Vec<Brick>) -> Vec<HashSet<usize>> {
         max_loc.y = max(max_loc.y, brick.end.y);
     }
 
-    let mut grid =
-        vec![vec![(0, None); (max_loc.x - min_loc.x) as usize]; (max_loc.y - min_loc.y) as usize];
+    let mut grid = vec![vec![(0, None); (max_loc.x - min_loc.x) as usize]; (max_loc.y - min_loc.y) as usize];
 
     let mut supported_by: Vec<HashSet<usize>> = vec![HashSet::new(); bricks.len()];
 
@@ -126,10 +123,7 @@ pub fn part_two(input: &str) -> Option<usize> {
         causes_to_fall
     };
 
-    (0..bricks.len())
-        .map(|id| causes_to_fall(id).len() - 1)
-        .sum::<usize>()
-        .into()
+    (0..bricks.len()).map(|id| causes_to_fall(id).len() - 1).sum::<usize>().into()
 }
 
 #[cfg(test)]

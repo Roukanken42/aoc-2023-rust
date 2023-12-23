@@ -31,19 +31,14 @@ impl Color {
 
 impl<'a> Parsable<'a> for Color {
     fn parse(input: &str) -> IResult<&str, Color> {
-        alt((
-            value(Red, tag("red")),
-            value(Green, tag("green")),
-            value(Blue, tag("blue")),
-        ))(input)
+        alt((value(Red, tag("red")), value(Green, tag("green")), value(Blue, tag("blue"))))(input)
     }
 }
 
 fn parse_color_map(input: &str) -> IResult<&str, HashMap<Color, u32>> {
-    let color_count = map(
-        separated_pair(u32::parse, char(' '), Color::parse),
-        |(count, color)| (color, count),
-    );
+    let color_count = map(separated_pair(u32::parse, char(' '), Color::parse), |(count, color)| {
+        (color, count)
+    });
 
     let (input, color_list) = separated_list1(tag(", "), color_count)(input)?;
 
@@ -95,11 +90,7 @@ pub fn part_two(input: &str) -> Option<u32> {
             .map(|&color| {
                 (
                     color,
-                    game.sets
-                        .iter()
-                        .map(|set| *set.get(&color).unwrap_or(&0))
-                        .max()
-                        .unwrap_or(0),
+                    game.sets.iter().map(|set| *set.get(&color).unwrap_or(&0)).max().unwrap_or(0),
                 )
             })
             .collect()
@@ -109,13 +100,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         games
             .iter()
             .map(minimum_dices_for_game)
-            .map(|dices| {
-                dices
-                    .iter()
-                    .map(|(_, &count)| count)
-                    .reduce(|a, b| a * b)
-                    .unwrap_or(0)
-            })
+            .map(|dices| dices.iter().map(|(_, &count)| count).reduce(|a, b| a * b).unwrap_or(0))
             .sum(),
     )
 }
@@ -146,9 +131,7 @@ mod tests {
     #[test]
     fn test_dice_game_parse() {
         assert_eq!(
-            DiceGame::parse(
-                "Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red"
-            ),
+            DiceGame::parse("Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red"),
             Ok((
                 "",
                 DiceGame {

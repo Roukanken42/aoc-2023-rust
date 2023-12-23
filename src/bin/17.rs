@@ -16,10 +16,7 @@ use advent_of_code::utils::parse_input_by_lines;
 advent_of_code::solution!(17);
 
 fn parse(input: &str) -> IResult<&str, Vec<Vec<i32>>> {
-    parse_input_by_lines(many1(map_res(
-        recognize(one_of("0123456789")),
-        i32::from_str,
-    )))(input)
+    parse_input_by_lines(many1(map_res(recognize(one_of("0123456789")), i32::from_str)))(input)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Ord, Eq, Hash)]

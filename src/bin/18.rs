@@ -64,11 +64,8 @@ impl Parsable<'_> for DigPlan {
             value(Direction::Up, char('3')),
         ));
 
-        let (input, (decoded_length, decoded_direction)) = delimited(
-            tag("(#"),
-            pair(parse_decoded_length, parse_decoded_direction),
-            char(')'),
-        )(input)?;
+        let (input, (decoded_length, decoded_direction)) =
+            delimited(tag("(#"), pair(parse_decoded_length, parse_decoded_direction), char(')'))(input)?;
 
         Ok((
             input,

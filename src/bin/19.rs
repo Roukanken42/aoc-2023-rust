@@ -98,12 +98,7 @@ impl Parsable<'_> for Rule {
     fn parse(input: &str) -> IResult<&str, Self> {
         alt((
             map(
-                tuple((
-                    Attribute::parse,
-                    Condition::parse,
-                    tag(":"),
-                    WorkflowType::parse,
-                )),
+                tuple((Attribute::parse, Condition::parse, tag(":"), WorkflowType::parse)),
                 |(attribute, condition, _, next)| Rule::Conditional {
                     attribute,
                     condition,
@@ -181,16 +176,9 @@ impl Workflow {
 impl Parsable<'_> for Workflow {
     fn parse(input: &str) -> IResult<&str, Self> {
         let (input, workflow_type) = WorkflowType::parse(input)?;
-        let (input, rules) =
-            delimited(tag("{"), separated_list0(tag(","), Rule::parse), tag("}"))(input)?;
+        let (input, rules) = delimited(tag("{"), separated_list0(tag(","), Rule::parse), tag("}"))(input)?;
 
-        Ok((
-            input,
-            Self {
-                workflow_type,
-                rules,
-            },
-        ))
+        Ok((input, Self { workflow_type, rules }))
     }
 }
 
@@ -245,10 +233,7 @@ impl Parsable<'_> for Part {
     fn parse(input: &str) -> IResult<&str, Self> {
         let (input, attributes) = delimited(
             tag("{"),
-            separated_list0(
-                tag(","),
-                separated_pair(Attribute::parse, tag("="), u32::parse),
-            ),
+            separated_list0(tag(","), separated_pair(Attribute::parse, tag("="), u32::parse)),
             tag("}"),
         )(input)?;
 
@@ -354,17 +339,12 @@ pub fn part_one(input: &str) -> Option<u32> {
             current_workflow = next;
         }
 
-        result
-            .get_mut(&current_workflow)
-            .unwrap()
-            .push(part.clone());
+        result.get_mut(&current_workflow).unwrap().push(part.clone());
     }
 
     let unprocessed = result
         .iter()
-        .filter(|(workflow, parts)| {
-            matches!(workflow, WorkflowType::Custom(_)) && !parts.is_empty()
-        })
+        .filter(|(workflow, parts)| matches!(workflow, WorkflowType::Custom(_)) && !parts.is_empty())
         .collect::<HashMap<_, _>>();
 
     assert_eq!(unprocessed, HashMap::new());
@@ -391,9 +371,7 @@ pub fn part_two(input: &str) -> Option<u64> {
         match workflow_type {
             WorkflowType::Accepted => accepted_ranges.push(part_range),
             WorkflowType::Rejected => {}
-            WorkflowType::Custom(_) => {
-                queue.extend(workflows_by_type[&workflow_type].execute_range(&part_range))
-            }
+            WorkflowType::Custom(_) => queue.extend(workflows_by_type[&workflow_type].execute_range(&part_range)),
         }
     }
 
@@ -412,10 +390,7 @@ mod tests {
     fn test_parse_workflow_type() {
         assert_eq!(WorkflowType::parse("A"), Ok(("", WorkflowType::Accepted)));
         assert_eq!(WorkflowType::parse("R"), Ok(("", WorkflowType::Rejected)));
-        assert_eq!(
-            WorkflowType::parse("abc"),
-            Ok(("", WorkflowType::Custom("abc".to_string())))
-        );
+        assert_eq!(WorkflowType::parse("abc"), Ok(("", WorkflowType::Custom("abc".to_string()))));
     }
 
     #[test]

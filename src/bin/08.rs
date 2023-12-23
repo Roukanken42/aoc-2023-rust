@@ -29,10 +29,7 @@ struct Day8<'a> {
 
 impl<'a> Parsable<'a> for Day8<'a> {
     fn parse(input: &'a str) -> IResult<&str, Self> {
-        let parse_direction = alt((
-            value(Direction::Left, char('L')),
-            value(Direction::Right, char('R')),
-        ));
+        let parse_direction = alt((value(Direction::Left, char('L')), value(Direction::Right, char('R'))));
 
         let (input, directions) = terminated(many1(parse_direction), count(line_ending, 2))(input)?;
 
@@ -41,11 +38,7 @@ impl<'a> Parsable<'a> for Day8<'a> {
             separated_pair(
                 take(3usize),
                 tag(" = "),
-                delimited(
-                    char('('),
-                    separated_pair(take(3usize), tag(", "), take(3usize)),
-                    char(')'),
-                ),
+                delimited(char('('), separated_pair(take(3usize), tag(", "), take(3usize)), char(')')),
             ),
         )(input)?;
 
@@ -104,21 +97,13 @@ fn find_cycle<T: Hash + Eq>(input: &mut dyn Iterator<Item = T>) -> Option<(usize
 pub fn part_one(input: &str) -> Option<u32> {
     let (_, day) = parse_input(Day8::parse)(input).unwrap();
 
-    Some(
-        day.walk_trough_desert("AAA")
-            .take_while(|(_, node)| node != &"ZZZ")
-            .count() as u32,
-    )
+    Some(day.walk_trough_desert("AAA").take_while(|(_, node)| node != &"ZZZ").count() as u32)
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
     let (_, day) = parse_input(Day8::parse)(input).unwrap();
 
-    let starts = day
-        .graph
-        .keys()
-        .filter(|key| key.ends_with('A'))
-        .collect::<Vec<_>>();
+    let starts = day.graph.keys().filter(|key| key.ends_with('A')).collect::<Vec<_>>();
 
     let cycles = starts
         .iter()
@@ -126,9 +111,7 @@ pub fn part_two(input: &str) -> Option<u64> {
         .collect::<Vec<_>>();
 
     let winning_positions = zip(starts.iter(), cycles.iter())
-        .filter_map(|(start, cycle)| {
-            cycle.map(|(start_pos, end_pos)| (start, (start_pos, end_pos)))
-        })
+        .filter_map(|(start, cycle)| cycle.map(|(start_pos, end_pos)| (start, (start_pos, end_pos))))
         .map(|(start, (_, length))| {
             day.walk_trough_desert(start)
                 .enumerate()
@@ -145,22 +128,15 @@ pub fn part_two(input: &str) -> Option<u64> {
         .collect::<Vec<_>>();
 
     // only solve the problem for one winning position on cycle, and ensure it's always at start
-    let is_solvable = zip(cycle_lengths.iter(), winning_positions.iter()).all(
-        |(cycle_length, winning_position)| {
-            cycle_length.is_some()
-                && winning_position.len() == 1
-                && winning_position[0] == cycle_length.unwrap()
-        },
-    );
+    let is_solvable = zip(cycle_lengths.iter(), winning_positions.iter()).all(|(cycle_length, winning_position)| {
+        cycle_length.is_some() && winning_position.len() == 1 && winning_position[0] == cycle_length.unwrap()
+    });
 
     if !is_solvable {
         return None;
     }
 
-    cycle_lengths
-        .iter()
-        .map(|length| length.unwrap() as u64)
-        .reduce(lcm)
+    cycle_lengths.iter().map(|length| length.unwrap() as u64).reduce(lcm)
 }
 
 #[cfg(test)]

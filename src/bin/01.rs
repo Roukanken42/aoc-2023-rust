@@ -7,8 +7,7 @@ fn get_digits(input: &str) -> Vec<u32> {
 }
 
 static DIGITS: [&str; 18] = [
-    "1", "2", "3", "4", "5", "6", "7", "8", "9", "one", "two", "three", "four", "five", "six",
-    "seven", "eight", "nine",
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
 ];
 
 fn get_digits_spelled(input: &str) -> (u32, u32) {
@@ -23,19 +22,8 @@ fn get_digits_spelled(input: &str) -> (u32, u32) {
         .max_by_key(|&&digit| input.rfind(digit).unwrap_or(usize::MIN))
         .unwrap();
 
-    let first_digit = DIGITS
-        .iter()
-        .enumerate()
-        .find(|(_, &digit)| digit == first)
-        .unwrap()
-        .0 as u32;
-
-    let last_digit = DIGITS
-        .iter()
-        .enumerate()
-        .find(|(_, &digit)| digit == last)
-        .unwrap()
-        .0 as u32;
+    let first_digit = DIGITS.iter().enumerate().find(|(_, &digit)| digit == first).unwrap().0 as u32;
+    let last_digit = DIGITS.iter().enumerate().find(|(_, &digit)| digit == last).unwrap().0 as u32;
 
     (first_digit % 9 + 1, last_digit % 9 + 1)
 }
