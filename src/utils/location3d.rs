@@ -1,6 +1,7 @@
 use std::iter::successors;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
+use crate::utils::location::Location;
 use num::{one, zero, Bounded, Num, Signed, Zero};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -21,6 +22,10 @@ impl<T: Num> Location3d<T> {
 
     pub fn try_map<U: Num, E, F: Fn(T) -> Result<U, E>>(self, f: F) -> Result<Location3d<U>, E> {
         Ok(Location3d::new(f(self.x)?, f(self.y)?, f(self.z)?))
+    }
+
+    pub fn to_2d(self) -> Location<T> {
+        Location::new(self.x, self.y)
     }
 }
 
