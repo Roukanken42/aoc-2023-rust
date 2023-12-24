@@ -1,6 +1,5 @@
 use std::ops::RangeBounds;
 
-use itertools::Itertools;
 use nom::bytes::complete::tag;
 use nom::character::complete::space0;
 use nom::sequence::{preceded, separated_pair, tuple};
