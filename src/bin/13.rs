@@ -39,13 +39,9 @@ impl Pattern {
     }
 
     fn find_mirror_row(&self) -> Option<usize> {
-        for ((i, row), (j, next)) in self.tiles.iter().enumerate().tuple_windows() {
-            if row != next {
-                continue;
-            }
-
+        for (i, _) in self.tiles.iter().enumerate() {
             let mut current = i;
-            let mut mirrored = j;
+            let mut mirrored = i + 1;
 
             while mirrored < self.tiles.len() {
                 if self.tiles[current] != self.tiles[mirrored] {
@@ -54,6 +50,42 @@ impl Pattern {
 
                 if current == 0 || mirrored == self.tiles.len() - 1 {
                     return Some(i + 1);
+                }
+
+                current -= 1;
+                mirrored += 1;
+            }
+        }
+        None
+    }
+
+    fn find_mirror_row_with_smudge(&self) -> Option<usize> {
+        for (i, _) in self.tiles.iter().enumerate() {
+            let mut current = i;
+            let mut mirrored = i + 1;
+
+            let mut had_smudge = false;
+
+            while mirrored < self.tiles.len() {
+                let differences = self.tiles[current]
+                    .iter()
+                    .zip(self.tiles[mirrored].iter())
+                    .filter(|(a, b)| a != b)
+                    .count();
+
+                match had_smudge {
+                    false if differences > 1 => break,
+                    false if differences == 1 => had_smudge = true,
+                    true if differences > 0 => break,
+                    _ => (),
+                }
+
+                if current == 0 || mirrored == self.tiles.len() - 1 {
+                    if had_smudge {
+                        return Some(i + 1);
+                    } else {
+                        break;
+                    }
                 }
 
                 current -= 1;
@@ -92,8 +124,20 @@ pub fn part_one(input: &str) -> Option<usize> {
     )
 }
 
-pub fn part_two(_input: &str) -> Option<u32> {
-    None
+pub fn part_two(input: &str) -> Option<usize> {
+    let (_, patterns) = parse(input).unwrap();
+
+    Some(
+        patterns
+            .iter()
+            .flat_map(|pattern| {
+                pattern
+                    .find_mirror_row_with_smudge()
+                    .map(|x| x * 100)
+                    .or_else(|| pattern.rotate().find_mirror_row_with_smudge())
+            })
+            .sum(),
+    )
 }
 
 #[cfg(test)]
@@ -109,6 +153,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(400));
     }
 }
