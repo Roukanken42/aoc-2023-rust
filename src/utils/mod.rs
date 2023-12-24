@@ -9,6 +9,7 @@ use nom::sequence::{pair, terminated};
 use nom::{IResult, Parser};
 
 pub mod location;
+pub mod location3d;
 
 pub fn parse_input_by_lines<'a, O, E, F>(f: F) -> impl FnMut(&'a str) -> IResult<&str, Vec<O>, E>
 where
