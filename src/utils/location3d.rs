@@ -119,7 +119,7 @@ pub mod direction3d {
     pub const LEFT: Location3d<i32> = Location3d::new(-1, 0, 0);
     pub const RIGHT: Location3d<i32> = Location3d::new(1, 0, 0);
     pub const FORWARD: Location3d<i32> = Location3d::new(0, -1, 0);
-    pub const BACKWARDS: Location3d<i32> = Location3d::new(0, 1, 0);
+    pub const BACKWARD: Location3d<i32> = Location3d::new(0, 1, 0);
     pub const UP: Location3d<i32> = Location3d::new(0, 0, 1);
     pub const DOWN: Location3d<i32> = Location3d::new(0, 0, -1);
 }
